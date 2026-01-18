@@ -16,7 +16,7 @@ export default function HowItWorks() {
               key={step}
               className="flex items-start gap-6 border-b pb-6 last:border-b-0 text-2xl"
             >
-              <span className="text-2xl font-bold text-violet-500 text-2xl">
+              <span className="text-2xl font-bold text-violet-500">
                 {index + 1}
               </span>
               <p className="text-gray-700">{step}</p>
