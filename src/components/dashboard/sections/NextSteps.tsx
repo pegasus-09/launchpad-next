@@ -9,7 +9,7 @@ export default function NextSteps() {
   const progress = Math.round((completed / steps.length) * 100)
 
   return (
-    <section className="rounded-2xl border bg-white p-6">
+    <section className="rounded-2xl border bg-white p-6 mx-10">
       <h2 className="mb-4 text-lg font-semibold">Next steps</h2>
 
       <ul className="space-y-2">

@@ -1,6 +1,6 @@
 export default function AtAGlance() {
   return (
-    <section className="rounded-2xl border bg-white p-6">
+    <section className="rounded-2xl border bg-white p-6 mx-10">
       <h2 className="mb-4 text-lg font-semibold">At a glance</h2>
 
       <div className="flex items-center gap-6">
