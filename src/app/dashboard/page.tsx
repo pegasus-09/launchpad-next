@@ -1,18 +1,17 @@
-"use client"
-
-import DashboardLayout from "@/components/dashboard/DashboardLayout"
-import LogoutButton from "@/components/auth/LogoutButton"
+import WelcomeHeader from "@/components/dashboard/sections/WelcomeHeader"
+import AtAGlance from "@/components/dashboard/sections/AtAGlance"
+import NextSteps from "@/components/dashboard/sections/NextSteps"
+import StrengthsAndGaps from "@/components/dashboard/sections/StrengthsAndGaps"
+import RoadmapAndColleges from "@/components/dashboard/sections/RoadmapAndUnis"
 
 export default function DashboardPage() {
   return (
-    <DashboardLayout>
-      <h2 className="text-2xl font-bold">
-        Welcome to your dashboard
-      </h2>
-
-      <p className="mt-4 text-gray-600">
-        This is where your career insights will live.
-      </p>
-    </DashboardLayout>
+    <div className="space-y-10">
+      <WelcomeHeader />
+      <AtAGlance />
+      <NextSteps />
+      <StrengthsAndGaps />
+      <RoadmapAndColleges />
+    </div>
   )
 }
