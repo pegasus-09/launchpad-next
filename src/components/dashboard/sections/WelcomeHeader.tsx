@@ -28,7 +28,6 @@ export default function WelcomeHeader() {
                 Here's a snapshot of your progress so far.
             </p>
         </div>
-        <LogoutButton />
         </section>
     )
 }

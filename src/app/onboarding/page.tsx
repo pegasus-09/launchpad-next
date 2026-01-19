@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabaseClient"
 
 const educationOptions = [
     "Middle school",
@@ -35,12 +36,22 @@ export default function OnboardingPage() {
         setStep(step + 1)
     }
 
-    function finishOnboarding() {
-        router.push("/dashboard")
+    async function finishOnboarding() {
+        await supabase.auth.updateUser({
+            data: {
+                onboarding_complete: true,
+                education,
+                goal,
+                confidence,
+            },
+        })
+
+    router.push("/dashboard")
     }
 
+
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-6">
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-6 text-black">
             <div className="w-full max-w-lg rounded-2xl border bg-white p-8">
                 {step === 0 && (
                     <section>
