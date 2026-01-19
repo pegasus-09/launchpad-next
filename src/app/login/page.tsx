@@ -1,31 +1,32 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import AuthLayout from "../../components/AuthLayout"
-import { supabase } from "../../lib/supabaseClient"
-import Link from "next/link"
+import { useState } from "react";
+import AuthLayout from "../../components/auth/AuthLayout";
+import { supabase } from "../../lib/supabaseClient";
+import Link from "next/link";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
-    setError(null)
-    setLoading(true)
+    setError(null);
+    setLoading(true);
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
-    })
+    });
 
     if (error) {
-      setError(error.message)
+      setError(error.message);
     }
 
-    setLoading(false)
+    setLoading(false);
   }
+
   return (
     <AuthLayout side="left" bgColor="bg-teal-400">
       <h1 className="text-4xl font-bold text-black">
@@ -61,9 +62,7 @@ export default function LoginPage() {
         </button>
 
         {error && (
-          <p className="mt-4 text-sm text-red-500">
-            {error}
-          </p>
+          <p className="mt-4 text-sm text-red-500">{error}</p>
         )}
       </div>
 
@@ -73,5 +72,5 @@ export default function LoginPage() {
         </a>
       </p>
     </AuthLayout>
-  )
+  );
 }

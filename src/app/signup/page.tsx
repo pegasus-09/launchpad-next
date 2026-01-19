@@ -1,29 +1,29 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import AuthLayout from "../../components/AuthLayout"
-import { supabase } from "../../lib/supabaseClient"
+import { useState } from "react";
+import AuthLayout from "../../components/auth/AuthLayout";
+import { supabase } from "../../lib/supabaseClient";
 
 export default function SignupPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   async function handleSignup() {
-    setError(null)
-    setLoading(true)
+    setError(null);
+    setLoading(true);
 
     const { error } = await supabase.auth.signUp({
       email,
       password,
-    })
+    });
 
     if (error) {
-      setError(error.message)
+      setError(error.message);
     }
 
-    setLoading(false)
+    setLoading(false);
   }
 
   return (
@@ -61,9 +61,7 @@ export default function SignupPage() {
         </button>
 
         {error && (
-          <p className="mt-4 text-sm text-red-500">
-            {error}
-          </p>
+          <p className="mt-4 text-sm text-red-500">{error}</p>
         )}
       </div>
 
@@ -73,6 +71,6 @@ export default function SignupPage() {
         </a>
       </p>
     </AuthLayout>
-  )
+  );
 }
 
