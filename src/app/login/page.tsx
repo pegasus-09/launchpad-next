@@ -3,6 +3,7 @@
 import { useState } from "react"
 import AuthLayout from "../../components/AuthLayout"
 import { supabase } from "../../lib/supabaseClient"
+import Link from "next/link"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -27,7 +28,7 @@ export default function LoginPage() {
   }
   return (
     <AuthLayout side="left" bgColor="bg-teal-400">
-      <h1 className="text-4xl font-bold text-gray-600">
+      <h1 className="text-4xl font-bold text-black">
         <span className="text-teal-400">Log in</span>
         <br />
         to your account
@@ -66,7 +67,7 @@ export default function LoginPage() {
         )}
       </div>
 
-      <p className="mt-6 text-sm text-gray-400">
+      <p className="mt-6 text-sm text-gray-500 hover:text-gray-700">
         <a href="/signup" className="underline">
           I don&apos;t have an account
         </a>

@@ -28,7 +28,7 @@ export default function SignupPage() {
 
   return (
     <AuthLayout side="right" bgColor="bg-violet-500">
-      <h1 className="text-4xl font-bold text-gray-600">
+      <h1 className="text-4xl font-bold text-black">
         <span className="text-violet-500">Sign up</span>
         <br />
         for an account
@@ -67,7 +67,7 @@ export default function SignupPage() {
         )}
       </div>
 
-      <p className="mt-6 text-sm text-gray-400">
+      <p className="mt-6 text-sm text-gray-500 hover:text-gray-700">
         <a href="/login" className="underline">
           I already have an account
         </a>

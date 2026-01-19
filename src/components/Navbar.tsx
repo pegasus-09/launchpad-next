@@ -1,6 +1,8 @@
+import Link from "next/link"
+
 export default function Navbar() {
   return (
-    <header className="w-full border-b border-gray-200">
+    <header className="w-full border-b border-gray-200 bg-gray-900 text-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
         <div className="text-lg font-bold font-mono">
@@ -21,12 +23,12 @@ export default function Navbar() {
 
           {/* Auth actions */}
           <div className="ml-4 flex items-center gap-3">
-            <button className="rounded-md border border-gray-300 px-4 py-2 text-sm">
+            <Link href="/login" className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-800">
               Log in
-            </button>
-            <button className="rounded-md bg-violet-500 px-4 py-2 text-sm text-white">
+            </Link>
+            <Link href="/signup" className="rounded-md bg-violet-500 px-4 py-2 text-sm text-white hover:bg-violet-600">
               Sign up
-            </button>
+            </Link>
           </div>
         </nav>
       </div>
