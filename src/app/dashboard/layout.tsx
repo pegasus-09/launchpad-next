@@ -36,8 +36,8 @@ export default function DashboardLayout({ children }: Props) {
             {/* Sidebar */}
             <aside className="fixed inset-y-0 left-0 flex w-64 flex-col border-r bg-white px-4 py-6">
                 <div className="flex flex-col">
-                    <h2 className="mb-8 text-xl font-bold">
-                        Launchpad
+                    <h2 className="mb-8 text-xl font-bold font-mono">
+                        launchpad
                     </h2>
 
                     <nav className="space-y-2 text-sm">
