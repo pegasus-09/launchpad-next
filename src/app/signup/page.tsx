@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import AuthLayout from "../../components/auth/AuthLayout";
-import { supabase } from "../../lib/supabaseClient";
+import AuthLayout from "@/components/auth/AuthLayout";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -10,17 +11,23 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const router = useRouter();
+
   async function handleSignup() {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (error) {
       setError(error.message);
+    }
+
+    if (data.session) {
+      router.push("/dashboard")
     }
 
     setLoading(false);

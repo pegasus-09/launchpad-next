@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import AuthLayout from "../../components/auth/AuthLayout";
-import { supabase } from "../../lib/supabaseClient";
+import AuthLayout from "@/components/auth/AuthLayout";
+import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,17 +12,23 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const router = useRouter()
+
   async function handleLogin() {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
       setError(error.message);
+    }
+
+    if (data.session) {
+      router.push("/dashboard")
     }
 
     setLoading(false);
