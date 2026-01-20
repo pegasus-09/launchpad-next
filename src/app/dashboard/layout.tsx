@@ -56,6 +56,13 @@ export default function DashboardLayout({ children }: Props) {
                         </Link>
 
                         <Link
+                            href="/assessment"
+                            className="block rounded px-3 py-2 hover:bg-gray-100"
+                        >
+                            Assessment
+                        </Link>
+
+                        <Link
                             href="/dashboard/results"
                             className="block rounded px-3 py-2 hover:bg-gray-100"
                         >
