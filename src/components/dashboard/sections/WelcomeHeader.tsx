@@ -1,7 +1,7 @@
 "use client";
 
 import LogoutButton from "@/components/auth/LogoutButton"
-import { supabase } from "@/lib/supabaseClient"
+import { supabase } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 
 export default function WelcomeHeader() {

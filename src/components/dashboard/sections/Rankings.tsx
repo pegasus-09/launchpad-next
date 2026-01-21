@@ -32,8 +32,11 @@ export default function Rankings({
             </h2>
 
             <ol className="space-y-2 text-sm">
-                {ranking.slice(0, limit).map((item, index) => (
-                    <li className="flex items-center justify-between rounded border px-3 py-2">
+                {ranking.slice(0, limit).map(item => (
+                    <li
+                        key={item[0]}
+                        className="flex items-center justify-between rounded border px-3 py-2"
+                    >
                         <div>
                             <div className="text-base">
                                 {item[1]}

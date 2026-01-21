@@ -1,8 +1,8 @@
 "use client"
 
-import { ReactNode, useEffect } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
+import { supabase } from "@/lib/supabase/client"
 import LogoutButton from "@/components/auth/LogoutButton"
 import Link from "next/link"
 
@@ -12,24 +12,28 @@ type Props = {
 
 export default function DashboardLayout({ children }: Props) {
     const router = useRouter()
+    const [authChecked, setAuthChecked] = useState(false)
 
     useEffect(() => {
-        supabase.auth.getUser().then(({ data }) => {
-            const user = data.user
+        async function checkAuth() {
+            const {
+                data: { session },
+            } = await supabase.auth.getSession()
 
-            if (!user) {
+            if (!session?.user) {
                 router.replace("/login")
                 return
             }
 
-            const onboardingComplete =
-                user.user_metadata?.onboarding_complete === true
+            setAuthChecked(true)
+        }
 
-            if (!onboardingComplete) {
-                router.replace("/onboarding")
-            }
-        })
+        checkAuth()
     }, [router])
+
+    if (!authChecked) {
+        return <div className="p-6">Loading…</div>
+    }
 
     return (
         <div className="flex min-h-screen bg-gray-50 text-black">
@@ -76,13 +80,10 @@ export default function DashboardLayout({ children }: Props) {
                 </div>
             </aside>
 
-
-
             {/* Main content */}
             <main className="ml-64 flex-1 overflow-y-auto px-8 py-10">
                 {children}
             </main>
-
         </div>
     )
 }

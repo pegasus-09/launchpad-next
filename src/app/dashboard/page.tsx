@@ -14,17 +14,16 @@ type RankingItem = [string, string, number]
 
 export default function DashboardPage() {
     const [ranking, setRanking] = useState<RankingItem[] | null>(null)
-    const [loading, setLoading] = useState(true)
+    const [authChecked, setAuthChecked] = useState(false)
 
     useEffect(() => {
         async function load() {
             const {
                 data: { user },
-                error,
             } = await supabase.auth.getUser()
 
-            if (error || !user) {
-                setLoading(false)
+            if (!user) {
+                setAuthChecked(true)
                 return
             }
 
@@ -34,26 +33,26 @@ export default function DashboardPage() {
                 setRanking(metadata.latest_ranking)
             }
 
-            setLoading(false)
+            setAuthChecked(true)
         }
 
         load()
     }, [])
 
-    if (loading) {
+    if (!authChecked) {
         return <p className="p-6">Loading…</p>
     }
 
     if (!ranking) {
         return (
             <div className="p-6">
-                <p>No assessment data found.</p>
+                <p>No assessment results found.</p>
             </div>
         )
     }
 
     return (
-        <div className="space-y-5 bg-white text-black">
+        <div className="space-y-5 bg-gray-50 text-black">
             <WelcomeHeader />
             <AtAGlance />
             <Rankings ranking={ranking} />

@@ -40,20 +40,13 @@ export default function AssessmentPage() {
             })
             const data = await res.json()
             const ranking = data.ranking
+
+            // Adding data to supabase user metadata
             const {
                 data: { session },
             } = await supabase.auth.getSession()
 
-            console.log("SESSION:", session)
-
-            const {
-                data: { user },
-                error: userError,
-            } = await supabase.auth.getUser()
-
-            console.log("User:", user)
-
-            if (userError || !user) {
+            if (!session?.user) {
                 throw new Error("User not authenticated")
             }
 
