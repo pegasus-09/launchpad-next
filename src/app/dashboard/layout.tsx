@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }: Props) {
     }
 
     return (
-        <div className="flex min-h-screen bg-gray-50 text-black">
+        <div className="flex h-screen bg-gray-50 text-black">
             {/* Sidebar */}
             <aside className="fixed inset-y-0 left-0 flex w-64 flex-col border-r bg-white px-4 py-6">
                 <div className="flex flex-col">

@@ -24,9 +24,7 @@ export default function AssessmentPage() {
     )
 
     async function submitAssessment() {
-        if (!allAnswered) {
-            return
-        }
+        if (!allAnswered) return
 
         setSubmitting(true)
 
@@ -38,10 +36,10 @@ export default function AssessmentPage() {
                 },
                 body: JSON.stringify(answers),
             })
+
             const data = await res.json()
             const ranking = data.ranking
 
-            // Adding data to supabase user metadata
             const {
                 data: { session },
             } = await supabase.auth.getSession()
@@ -50,25 +48,25 @@ export default function AssessmentPage() {
                 throw new Error("User not authenticated")
             }
 
-            const { error: updateError } = await supabase.auth.updateUser({
-                data: {
-                    assessment_completed: true,
-                    assessment_timestamp: new Date().toISOString(),
-                    latest_ranking: ranking,
-                },
-            })
+            const { error } = await supabase
+                .from("assessment_results")
+                .upsert({
+                    user_id: session.user.id,
+                    ranking,
+                    updated_at: new Date().toISOString(),
+                })
 
-            if (updateError) {
-                throw updateError
-}
+            if (error) {
+                throw error
+            }
 
             console.log("Ranking:", ranking)
             router.push("/dashboard")
-
         } finally {
             setSubmitting(false)
         }
     }
+
 
     return (
         <div className="mx-auto max-w-3xl px-6 py-10">
