@@ -91,7 +91,7 @@ export default function AssessmentPage() {
                             {[1, 2, 3, 4, 5].map(v => (
                                 <button
                                     key={v}
-                                    onMouseOver={() => setAnswer(q.id, v)} // Delete later
+                                    onMouseOver={process.env.DEV_MODE === "true" ? () => setAnswer(q.id, v) : undefined}
                                     onClick={() => setAnswer(q.id, v)}
                                     className={`h-10 w-10 rounded-full border text-sm ${
                                         answers[q.id] === v
