@@ -52,12 +52,12 @@ export default function DashboardLayout({ children }: Props) {
                             Dashboard
                         </Link>
 
-                        <Link
+                        {/* <Link
                             href="/dashboard/profile"
                             className="block rounded px-3 py-2 hover:bg-gray-100"
                         >
                             Profile
-                        </Link>
+                        </Link> */}
 
                         <Link
                             href="/assessment"
@@ -66,12 +66,12 @@ export default function DashboardLayout({ children }: Props) {
                             Assessment
                         </Link>
 
-                        <Link
-                            href="/dashboard/results"
+                        {/* <Link
+                            href="/dashboard/"
                             className="block rounded px-3 py-2 hover:bg-gray-100"
                         >
                             Results
-                        </Link>
+                        </Link> */}
                     </nav>
                 </div>
 
