@@ -29,13 +29,16 @@ export default function AssessmentPage() {
         setSubmitting(true)
 
         try {
-            const res = await fetch("http://localhost:8000/assessment", {
-                method: "POST",
-                headers: {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE}/assessment`,
+                {
+                    method: "POST",
+                    headers: {
                     "Content-Type": "application/json",
-                },
-                body: JSON.stringify(answers),
-            })
+                    },
+                    body: JSON.stringify(answers),
+                }
+                );
 
             const data = await res.json()
             const ranking = data.ranking
