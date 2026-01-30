@@ -35,6 +35,19 @@ export default function DashboardLayout({ children }: Props) {
         return <div className="p-6">Loading…</div>
     }
 
+    // Items for navigation - Update this when adding new dashboard sections
+    type NavItem = {
+        id: number
+        label: string
+        href: string
+    }
+
+    const navItems: NavItem[] = [
+        { id: 1, label: 'Dashboard', href: '/dashboard' },
+        { id: 2, label: 'Profile', href: '/profile' },
+        { id: 3, label: 'Portfolio', href: '/portfolio' }
+    ];
+
     return (
         <div className="flex h-screen bg-gray-50 text-black">
             {/* Sidebar */}
@@ -45,33 +58,15 @@ export default function DashboardLayout({ children }: Props) {
                     </h2>
 
                     <nav className="space-y-2 text-sm">
-                        <Link
-                            href="/dashboard"
-                            className="block rounded px-3 py-2 hover:bg-gray-100"
-                        >
-                            Dashboard
-                        </Link>
-
-                        {/* <Link
-                            href="/dashboard/profile"
-                            className="block rounded px-3 py-2 hover:bg-gray-100"
-                        >
-                            Profile
-                        </Link> */}
-
-                        <Link
-                            href="/assessment"
-                            className="block rounded px-3 py-2 hover:bg-gray-100"
-                        >
-                            Assessment
-                        </Link>
-
-                        {/* <Link
-                            href="/dashboard/"
-                            className="block rounded px-3 py-2 hover:bg-gray-100"
-                        >
-                            Results
-                        </Link> */}
+                        {navItems.map((item) => (
+                            <Link
+                                key={item.id}
+                                href={item.href}
+                                className="block rounded px-3 py-2 hover:bg-gray-100"
+                            >
+                                {item.label}
+                            </Link>
+                        ))}
                     </nav>
                 </div>
 
