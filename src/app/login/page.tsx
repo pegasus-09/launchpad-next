@@ -65,7 +65,7 @@ export default function LoginPage() {
             type="button"
             onClick={handleLogin}
             disabled={loading}
-            className="mt-4 w-full rounded-lg border border-teal-400 py-3 font-medium text-teal-500 hover:bg-teal-50 disabled:opacity-50"
+            className="mt-4 w-full rounded-lg border border-teal-400 py-3 font-medium text-teal-500 cursor-pointer hover:bg-teal-50 disabled:opacity-50"
         >
             {loading ? "Logging in..." : "Log in"}
         </button>

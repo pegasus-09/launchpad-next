@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
-import { generatePortfolio, loadPortfolio, savePortfolio } from "@/lib/portfolio"
+import {
+    loadPortfolio,
+    savePortfolio,
+    loadAssessmentResults,
+    generatePortfolio,
+} from "@/lib/portfolio"
 
 import ProjectsSection from "@/components/portfolio/ProjectsSection"
 import StrengthsSection from "@/components/portfolio/StrengthsSection"
@@ -12,10 +17,18 @@ import PortfolioReflectionSection from "@/components/portfolio/PortfolioReflecti
 
 export default function PortfolioPage() {
     const router = useRouter()
+
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
+
     const [portfolio, setPortfolio] = useState<any>(null)
+    const [assessmentAnswers, setAssessmentAnswers] =
+        useState<Record<string, number> | null>(null)
+
+    const [assessmentSuggestions, setAssessmentSuggestions] =
+        useState<{ strengths: any[]; gaps: any[] } | null>(null)
+
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
@@ -30,31 +43,30 @@ export default function PortfolioPage() {
             }
 
             try {
-                const existing = await loadPortfolio(session.user.id)
+                const existingPortfolio = await loadPortfolio(session.user.id)
+                const assessment = await loadAssessmentResults(session.user.id)
 
-                if (existing) {
-                    setPortfolio(existing)
-                    console.log("Loaded existing portfolio:", existing)
-                } else {
-                    // Temporary seed until real assessment answers are stored
-                    const fakeAnswers = {
-                        A1: 4, A2: 5, A3: 4, A4: 3, A5: 4,
-                        I1: 3, I2: 2, I3: 3, I4: 2, I5: 3, I6: 2,
-                        T1: 4, T2: 3, T3: 4, T4: 3, T5: 4, T6: 3,
-                        V1: 5, V2: 4, V3: 5, V4: 4, V5: 5, V6: 4,
-                        W1: 3, W2: 2, W3: 3, W4: 2,
-                    }
-
-                    const generated = await generatePortfolio(fakeAnswers)
-                    console.log("Generated portfolio:", generated.strengths)
-
-                    setPortfolio({
-                        ...generated,
-                        strengths: generated.strengths ?? [],
-                        gaps: generated.gaps ?? [],
-                    })
+                if (!assessment || !assessment.raw_answers) {
+                    throw new Error(
+                        "No assessment data exists. Please complete the assessment first."
+                    )
                 }
+
+                const suggestions = await generatePortfolio(
+                    assessment.raw_answers
+                )
+
+                // Initialize portfolio if it doesn't exist
+                setPortfolio(existingPortfolio || {
+                    strengths: [],
+                    gaps: [],
+                    projects: [],
+                    bio: null
+                })
+                setAssessmentAnswers(assessment.raw_answers)
+                setAssessmentSuggestions(suggestions)
             } catch (e: any) {
+                console.error('Portfolio initialization error:', e) // Add logging
                 setError(e.message ?? "Failed to load portfolio")
             } finally {
                 setLoading(false)
@@ -112,7 +124,25 @@ export default function PortfolioPage() {
         )
     }
 
-    console.log(portfolio.strengths)
+    if (!portfolio) {
+        return (
+            <div className="p-6 text-sm text-muted-foreground">
+                Loading portfolio…
+            </div>
+        )
+    }
+
+    const selectedAssessmentStrengths = new Set<string>(
+        (portfolio.strengths ?? [])
+            .filter((s: any) => s.source === "assessment")
+            .map((s: any) => s.signal as string)
+    )
+
+    const selectedAssessmentGaps = new Set<string>(
+        (portfolio.gaps ?? [])
+            .filter((g: any) => g.source === "assessment")
+            .map((g: any) => g.signal as string)
+    )
 
     return (
         <div className="max-w-3xl mx-auto p-6 space-y-8">
@@ -141,27 +171,39 @@ export default function PortfolioPage() {
                 onChange={(projects) =>
                     setPortfolio({
                         ...portfolio,
-                        projects
+                        projects,
                     })
                 }
             />
 
             <StrengthsSection
                 strengths={portfolio.strengths ?? []}
+                suggestedStrengths={
+                    assessmentSuggestions?.strengths ?? []
+                }
+                selectedAssessmentStrengths={
+                    selectedAssessmentStrengths
+                }
                 onChange={(strengths) =>
                     setPortfolio({
                         ...portfolio,
-                        strengths
+                        strengths,
                     })
                 }
             />
 
             <GapsSection
                 gaps={portfolio.gaps ?? []}
+                suggestedGaps={
+                    assessmentSuggestions?.gaps ?? []
+                }
+                selectedAssessmentGaps={
+                    selectedAssessmentGaps
+                }
                 onChange={(gaps) =>
                     setPortfolio({
                         ...portfolio,
-                        gaps
+                        gaps,
                     })
                 }
             />
@@ -171,7 +213,7 @@ export default function PortfolioPage() {
                 onChange={(summary) =>
                     setPortfolio({
                         ...portfolio,
-                        bio: summary
+                        bio: summary,
                     })
                 }
             />

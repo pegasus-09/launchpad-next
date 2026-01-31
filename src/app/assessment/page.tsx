@@ -41,6 +41,7 @@ export default function AssessmentPage() {
                 );
 
             const data = await res.json()
+            console.log("Assessment response data:", answers)
             const ranking = data.ranking
 
             const {
@@ -55,6 +56,7 @@ export default function AssessmentPage() {
                 .from("assessment_results")
                 .upsert({
                     user_id: session.user.id,
+                    raw_answers: answers,
                     ranking,
                     updated_at: new Date().toISOString(),
                 })
@@ -93,6 +95,7 @@ export default function AssessmentPage() {
                                     key={v}
                                     onMouseOver={process.env.DEV_MODE === "true" ? () => setAnswer(q.id, v) : undefined}
                                     onClick={() => setAnswer(q.id, v)}
+                                    onMouseEnter={() => setAnswer(q.id, v)}
                                     className={`h-10 w-10 rounded-full border text-sm ${
                                         answers[q.id] === v
                                             ? "bg-violet-600 text-white"
@@ -110,7 +113,7 @@ export default function AssessmentPage() {
             <button
                 onClick={submitAssessment}
                 disabled={!allAnswered || submitting}
-                className="mt-10 rounded-lg bg-violet-600 px-6 py-3 text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-10 rounded-lg bg-violet-600 px-6 py-3 text-white hover:bg-violet-700 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             >
                 Submit assessment
             </button>

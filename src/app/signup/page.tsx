@@ -62,7 +62,7 @@ export default function SignupPage() {
           type="button"
           onClick={handleSignup}
           disabled={loading}
-          className="mt-4 w-full rounded-lg bg-violet-500 py-3 font-medium text-white hover:bg-violet-600 disabled:opacity-50"
+          className="mt-4 w-full rounded-lg bg-violet-500 py-3 font-medium text-white cursor-pointer hover:bg-violet-600 disabled:opacity-50"
         >
           {loading ? "Signing up..." : "Sign up"}
         </button>

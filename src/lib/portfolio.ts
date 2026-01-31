@@ -1,3 +1,5 @@
+import { supabase } from "@/lib/supabase/client"
+
 const API_URL = process.env.NEXT_PUBLIC_API_BASE!
 
 export async function generatePortfolio(answers: Record<string, number>) {
@@ -47,3 +49,18 @@ export async function loadPortfolio(userId: string) {
 
 	return res.json()
 }
+
+export async function loadAssessmentResults(userId: string) {
+    const { data, error } = await supabase
+        .from("assessment_results")
+        .select("raw_answers")
+        .eq("user_id", userId)
+        .single()
+
+    if (error) {
+        throw new Error(error.message)
+    }
+
+    return data
+}
+

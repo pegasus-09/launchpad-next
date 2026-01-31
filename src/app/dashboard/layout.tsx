@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }: Props) {
 
     const navItems: NavItem[] = [
         { id: 1, label: 'Dashboard', href: '/dashboard' },
-        { id: 2, label: 'Profile', href: '/profile' },
+        { id: 2, label: 'Assessment', href: '/assessment' },
         { id: 3, label: 'Portfolio', href: '/portfolio' }
     ];
 
