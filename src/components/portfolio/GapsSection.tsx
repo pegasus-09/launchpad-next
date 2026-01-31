@@ -31,6 +31,7 @@ export default function GapsSection({
     onChange,
 }: Props) {
     const [newGap, setNewGap] = useState("")
+    const [showSuggestions, setShowSuggestions] = useState(true)
 
     function toggleSuggested(suggestion: SuggestedGap) {
         const exists = gaps.some(
@@ -63,6 +64,20 @@ export default function GapsSection({
         }
     }
 
+    function addAllSuggestions() {
+        const newGaps = suggestedGaps
+            .filter(g => !selectedAssessmentGaps.has(g.signal))
+            .map(g => ({
+                signal: g.signal,
+                description: g.description,
+                category: g.category,
+                percentile: g.percentile,
+                source: "assessment" as const,
+            }))
+
+        onChange([...gaps, ...newGaps])
+    }
+
     function remove(index: number) {
         onChange(gaps.filter((_, i) => i !== index))
     }
@@ -81,97 +96,124 @@ export default function GapsSection({
         setNewGap("")
     }
 
+    const unselectedSuggestions = suggestedGaps.filter(
+        g => !selectedAssessmentGaps.has(g.signal)
+    )
+
     return (
-        <section className="space-y-4">
-            <h2 className="text-lg font-medium">
-                Gaps
-            </h2>
+        <section className="space-y-6">
+            <div>
+                <h2 className="text-xl font-semibold text-orange-900">Gaps</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                    Identify areas for improvement from suggestions or add your own
+                </p>
+            </div>
 
-            {suggestedGaps.length > 0 && (
-                <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">
-                        Suggested from your assessment
-                    </h3>
+            {/* Suggestions - Moved to top */}
+            {unselectedSuggestions.length > 0 && (
+                <div className="space-y-3 bg-orange-50/50 border-2 border-dashed border-orange-300 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                        <button
+                            onClick={() => setShowSuggestions(!showSuggestions)}
+                            className="flex items-center gap-2 text-sm font-medium text-orange-800 hover:text-orange-900 cursor-pointer"
+                        >
+                            <span>{showSuggestions ? "▼" : "▶"}</span>
+                            <span>
+                                Suggestions from assessment ({unselectedSuggestions.length})
+                            </span>
+                        </button>
 
-                    <ul className="space-y-2">
-                        {suggestedGaps.map(g => {
-                            const checked =
-                                selectedAssessmentGaps.has(
-                                    g.signal
-                                )
+                        {unselectedSuggestions.length > 0 && (
+                            <button
+                                onClick={addAllSuggestions}
+                                className="text-xs font-medium text-orange-700 hover:text-orange-900 underline cursor-pointer"
+                            >
+                                Add all
+                            </button>
+                        )}
+                    </div>
 
-                            return (
-                                <li
+                    {showSuggestions && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {unselectedSuggestions.map(g => (
+                                <button
                                     key={g.signal}
-                                    className="flex items-center gap-3 rounded-md border border-gray-200 p-3 text-sm"
+                                    onClick={() => toggleSuggested(g)}
+                                    className="text-left p-3 rounded-lg border border-orange-300 bg-white hover:border-orange-600 hover:bg-orange-50 transition-all text-sm capitalize cursor-pointer"
                                 >
-                                    <input
-                                        type="checkbox"
-                                        checked={checked}
-                                        onChange={() =>
-                                            toggleSuggested(g)
-                                        }
-                                    />
-
-                                    <span className="capitalize">
-                                        {g.signal === "work_life_balance" ? "Work-Life Balance" : g.signal.replaceAll("_", " ")}
-                                    </span>
-                                </li>
-                            )
-                        })}
-                    </ul>
+                                    + {g.signal === "work_life_balance" 
+                                        ? "Work-Life Balance" 
+                                        : g.signal.replaceAll("_", " ")}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
 
-            {!gaps.length && (
-                <p className="text-sm text-muted-foreground">
-                    No gaps added yet.
+            {/* Selected Gaps */}
+            {gaps.length > 0 && (
+                <div className="space-y-2">
+                    {gaps.map((g, i) => (
+                        <div
+                            key={`${g.signal}-${i}`}
+                            className="flex items-center justify-between gap-4 p-3 rounded-lg border border-orange-200 bg-orange-50"
+                        >
+                            <span className="font-medium capitalize text-orange-900">
+                                {g.signal === "work_life_balance" 
+                                    ? "Work-Life Balance" 
+                                    : g.signal.replaceAll("_", " ")}
+                            </span>
+
+                            <button
+                                onClick={() => {
+                                    if (g.source === "user") {
+                                        remove(i)
+                                    } else {
+                                        const suggestion = suggestedGaps.find(
+                                            sg => sg.signal === g.signal
+                                        )
+                                        if (suggestion) toggleSuggested(suggestion)
+                                    }
+                                }}
+                                className="text-gray-500 hover:text-red-600 text-sm cursor-pointer"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {gaps.length === 0 && (
+                <p className="text-sm text-gray-500 italic p-4 bg-gray-50 rounded-lg text-center">
+                    No gaps identified yet. Choose from suggestions above or add your own.
                 </p>
             )}
 
-            <ul className="space-y-2">
-                {gaps.map((g, i) => (
-                    <li
-                        key={`${g.signal}-${i}`}
-                        className="rounded-md border border-gray-200 p-3 text-sm flex justify-between gap-4"
+            {/* Add Custom Gap */}
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                    Add custom gap
+                </label>
+                <div className="flex gap-2">
+                    <input
+                        className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-opacity-20"
+                        placeholder="e.g., Time management, Technical skills..."
+                        value={newGap}
+                        onChange={e => setNewGap(e.target.value)}
+                        onKeyDown={e => {
+                            if (e.key === "Enter") add()
+                        }}
+                    />
+                    <button
+                        onClick={add}
+                        disabled={!newGap.trim()}
+                        className="px-6 py-2 text-sm font-medium text-white bg-orange-700 rounded-lg hover:bg-orange-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors cursor-pointer"
                     >
-                        <span>
-                            <span className="font-medium capitalize">
-                                {g.signal === "work_life_balance" ? "Work-Life Balance" : g.signal.replaceAll("_", " ")}
-                            </span>
-
-                            {g.source === "assessment" && (
-                                <span className="ml-2 text-xs text-muted-foreground">
-                                    (from assessment)
-                                </span>
-                            )}
-                        </span>
-
-                        <button
-                            onClick={() => remove(i)}
-                            className="text-sm text-red-500 hover:underline cursor-pointer"
-                        >
-                            Remove
-                        </button>
-                    </li>
-                ))}
-            </ul>
-
-            <div className="flex gap-2">
-                <input
-                    className="flex-1 rounded-md border px-3 py-2 text-sm"
-                    placeholder="Add a gap"
-                    value={newGap}
-                    onChange={e =>
-                        setNewGap(e.target.value)
-                    }
-                />
-                <button
-                    onClick={add}
-                    className="text-sm font-medium text-green-600 hover:underline cursor-pointer"
-                >
-                    Add
-                </button>
+                        Add
+                    </button>
+                </div>
             </div>
         </section>
     )
