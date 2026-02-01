@@ -5,22 +5,27 @@ export default function Hero() {
     <section className="relative overflow-hidden py-40 bg-white">
       <div className="mx-auto max-w-3xl px-6 text-center white">
         <h1 className="text-5xl font-extrabold tracking-tight text-black">
-          Blast off with{" "}
-          <span className="text-violet-500">Launchpad</span>.
+          Discover your perfect career with{" "}
+          <span className="text-violet-500">Launchpad</span>
         </h1>
 
         <p className="mt-6 text-lg text-gray-600">
-          AI career guidance for students choosing their future.
+          Take our psychometric assessment to get personalised career recommendations
+          based on your unique strengths, interests, and values.
         </p>
 
         <div className="mt-10 flex justify-center gap-4">
-          <Link href="/signup" className="rounded-lg bg-violet-500 px-6 py-3 font-medium text-white hover:bg-violet-600">
-            Let's go
+          <Link href="/assessment" className="rounded-lg bg-violet-500 px-6 py-3 font-medium text-white hover:bg-violet-600">
+            Take the quiz
           </Link>
-          <Link href="/" className="rounded-lg border border-teal-400 px-6 py-3 font-medium text-teal-500 hover:bg-teal-50">
+          <a href="#features" className="rounded-lg border border-teal-400 px-6 py-3 font-medium text-teal-500 hover:bg-teal-50">
             Learn more
-          </Link>
+          </a>
         </div>
+
+        <p className="mt-4 text-sm text-gray-500">
+          No login required to start • Get instant results
+        </p>
       </div>
     </section>
   )

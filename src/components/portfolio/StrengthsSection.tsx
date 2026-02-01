@@ -105,21 +105,21 @@ export default function StrengthsSection({
             <div>
                 <h2 className="text-xl font-semibold text-green-900">Strengths</h2>
                 <p className="text-sm text-gray-600 mt-1">
-                    Select from suggestions or add your own
+                    Click on the AI-suggested strengths below to add them, or add your own.
                 </p>
             </div>
 
             {/* Suggestions - Moved to top */}
             {unselectedSuggestions.length > 0 && (
-                <div className="space-y-3 bg-green-50/50 border-2 border-dashed border-green-300 rounded-lg p-4">
+                <div className="space-y-3 bg-green-50 border-2 border-dashed border-green-300 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                         <button
                             onClick={() => setShowSuggestions(!showSuggestions)}
-                            className="flex items-center gap-2 text-sm font-medium text-green-800 hover:text-green-900 cursor-pointer"
+                            className="flex items-center gap-2 text-sm font-semibold text-green-900 hover:text-green-700 cursor-pointer"
                         >
                             <span>{showSuggestions ? "▼" : "▶"}</span>
                             <span>
-                                Suggestions from assessment ({unselectedSuggestions.length})
+                                AI-Suggested Strengths ({unselectedSuggestions.length})
                             </span>
                         </button>
 
@@ -139,7 +139,7 @@ export default function StrengthsSection({
                                 <button
                                     key={s.signal}
                                     onClick={() => toggleSuggested(s)}
-                                    className="text-left p-3 rounded-lg border border-green-300 bg-white hover:border-green-600 hover:bg-green-50 transition-all text-sm capitalize cursor-pointer"
+                                    className="text-left p-3 rounded-lg border border-dashed border-green-400 bg-white hover:border-green-600 hover:bg-green-50 transition-all text-sm capitalize cursor-pointer"
                                 >
                                     + {s.signal === "work_life_balance" 
                                         ? "Work-Life Balance" 
@@ -154,10 +154,11 @@ export default function StrengthsSection({
             {/* Selected Strengths */}
             {strengths.length > 0 && (
                 <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-gray-700">Your Strengths</h3>
                     {strengths.map((s, i) => (
                         <div
                             key={`${s.signal}-${i}`}
-                            className="flex items-center justify-between gap-4 p-3 rounded-lg border border-green-200 bg-green-50"
+                            className="flex items-center justify-between gap-4 p-3 rounded-lg border border-gray-300 bg-white"
                         >
                             <span className="font-medium capitalize text-green-900">
                                 {s.signal === "work_life_balance" 
@@ -187,14 +188,14 @@ export default function StrengthsSection({
 
             {strengths.length === 0 && (
                 <p className="text-sm text-gray-500 italic p-4 bg-gray-50 rounded-lg text-center">
-                    No strengths selected yet. Choose from suggestions above or add your own.
+                    No strengths selected yet. Choose from AI suggestions above or add your own.
                 </p>
             )}
 
-            {/* Add Custom Strength */}
+            {/* Add Your Own */}
             <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                    Add custom strength
+                    Add your own
                 </label>
                 <div className="flex gap-2">
                     <input

@@ -199,27 +199,34 @@ export default function PortfolioPage() {
 
     return (
         <div className="max-w-3xl mx-auto p-6 space-y-8">
-            <div className="flex items-center justify-between gap-3">
+            <div className="mb-4">
+                <button
+                    onClick={() => router.push('/dashboard')}
+                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                    >
+                        <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            <div className="space-y-4">
                 <h1 className="text-2xl font-semibold">
                     My Portfolio
                 </h1>
 
-                <div className="flex gap-2">
-                    <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-100 disabled:opacity-50 cursor-pointer"
-                    >
-                        Save
-                    </button>
-
-                    <button
-                        onClick={handleSaveAndExport}
-                        disabled={saving}
-                        className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 cursor-pointer"
-                    >
-                        Save & Export PDF
-                    </button>
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                    <h3 className="font-bold text-blue-900 mb-2">Portfolio Instructions</h3>
+                    <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                        <li>Add 1 or more projects that showcase your skills and interests</li>
+                        <li>Select strengths and gaps from the AI-generated suggestions based on your assessment</li>
+                        <li>Write a brief bio that summarizes who you are and what you're passionate about</li>
+                        <li>Click "Save & Export PDF" to download your portfolio for university applications or resumes</li>
+                    </ul>
                 </div>
             </div>
 
@@ -280,6 +287,24 @@ export default function PortfolioPage() {
                     })
                 }
             />
+
+            <div className="flex gap-2 justify-end">
+                <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-100 disabled:opacity-50 cursor-pointer"
+                >
+                    Save
+                </button>
+
+                <button
+                    onClick={handleSaveAndExport}
+                    disabled={saving}
+                    className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 cursor-pointer"
+                >
+                    Save & Export PDF
+                </button>
+            </div>
         </div>
     )
 }

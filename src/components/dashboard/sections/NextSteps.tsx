@@ -1,10 +1,20 @@
-const steps = [
-  { label: "Complete career quiz", done: true },
-  { label: "Explore colleges", done: false },
-  { label: "Generate a resume", done: false },
-]
+interface NextStepsProps {
+  portfolio: any
+}
 
-export default function NextSteps() {
+export default function NextSteps({ portfolio }: NextStepsProps) {
+  const hasPortfolio = portfolio && (
+    (portfolio.strengths && portfolio.strengths.length > 0) ||
+    (portfolio.gaps && portfolio.gaps.length > 0) ||
+    (portfolio.projects && portfolio.projects.length > 0)
+  )
+
+  const steps = [
+    { label: "Complete career assessment", done: true },
+    { label: "Build portfolio", done: hasPortfolio },
+    { label: "Export portfolio PDF", done: false },
+  ]
+
   const completed = steps.filter(s => s.done).length
   const progress = Math.round((completed / steps.length) * 100)
 

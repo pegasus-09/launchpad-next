@@ -1,12 +1,13 @@
 const steps = [
-  "Sign up for a free account",
-  "Take the career assessment",
-  "Explore your personalised dashboard",
+  "Take the career assessment (no login required)",
+  "Create an account to save and view your results",
+  "Explore your personalised dashboard with career recommendations",
+  "Build your portfolio and export as PDF for applications",
 ]
 
 export default function HowItWorks() {
   return (
-    <section className="py-28 bg-white">
+    <section id="how-it-works" className="py-28 bg-gray-50">
       <div className="mx-auto max-w-3xl px-6">
         <h2 className="mb-10 text-3xl font-bold text-black">How it works</h2>
 
@@ -14,12 +15,12 @@ export default function HowItWorks() {
           {steps.map((step, index) => (
             <div
               key={step}
-              className="flex items-start gap-6 border-b pb-6 last:border-b-0 text-2xl"
+              className="flex items-start gap-6 border-b pb-6 last:border-b-0"
             >
-              <span className="text-2xl font-bold text-violet-500">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-violet-500 text-xl font-bold text-white">
                 {index + 1}
-              </span>
-              <p className="text-gray-700">{step}</p>
+              </div>
+              <p className="text-lg text-gray-700 pt-2">{step}</p>
             </div>
           ))}
         </div>

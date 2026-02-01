@@ -103,23 +103,23 @@ export default function GapsSection({
     return (
         <section className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold text-orange-900">Gaps</h2>
+                <h2 className="text-xl font-semibold text-orange-900">Development Areas</h2>
                 <p className="text-sm text-gray-600 mt-1">
-                    Identify areas for improvement from suggestions or add your own
+                    Click on the AI-suggested areas below to add them, or add your own.
                 </p>
             </div>
 
             {/* Suggestions - Moved to top */}
             {unselectedSuggestions.length > 0 && (
-                <div className="space-y-3 bg-orange-50/50 border-2 border-dashed border-orange-300 rounded-lg p-4">
+                <div className="space-y-3 bg-orange-50 border-2 border-dashed border-orange-300 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                         <button
                             onClick={() => setShowSuggestions(!showSuggestions)}
-                            className="flex items-center gap-2 text-sm font-medium text-orange-800 hover:text-orange-900 cursor-pointer"
+                            className="flex items-center gap-2 text-sm font-semibold text-orange-900 hover:text-orange-700 cursor-pointer"
                         >
                             <span>{showSuggestions ? "▼" : "▶"}</span>
                             <span>
-                                Suggestions from assessment ({unselectedSuggestions.length})
+                                AI-Suggested Development Areas ({unselectedSuggestions.length})
                             </span>
                         </button>
 
@@ -139,7 +139,7 @@ export default function GapsSection({
                                 <button
                                     key={g.signal}
                                     onClick={() => toggleSuggested(g)}
-                                    className="text-left p-3 rounded-lg border border-orange-300 bg-white hover:border-orange-600 hover:bg-orange-50 transition-all text-sm capitalize cursor-pointer"
+                                    className="text-left p-3 rounded-lg border border-dashed border-orange-400 bg-white hover:border-orange-600 hover:bg-orange-50 transition-all text-sm capitalize cursor-pointer"
                                 >
                                     + {g.signal === "work_life_balance" 
                                         ? "Work-Life Balance" 
@@ -154,10 +154,11 @@ export default function GapsSection({
             {/* Selected Gaps */}
             {gaps.length > 0 && (
                 <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-gray-700">Your Development Areas</h3>
                     {gaps.map((g, i) => (
                         <div
                             key={`${g.signal}-${i}`}
-                            className="flex items-center justify-between gap-4 p-3 rounded-lg border border-orange-200 bg-orange-50"
+                            className="flex items-center justify-between gap-4 p-3 rounded-lg border border-gray-300 bg-white"
                         >
                             <span className="font-medium capitalize text-orange-900">
                                 {g.signal === "work_life_balance" 
@@ -184,17 +185,16 @@ export default function GapsSection({
                     ))}
                 </div>
             )}
-
             {gaps.length === 0 && (
                 <p className="text-sm text-gray-500 italic p-4 bg-gray-50 rounded-lg text-center">
-                    No gaps identified yet. Choose from suggestions above or add your own.
+                    No development areas selected yet. Choose from AI suggestions above or add your own.
                 </p>
             )}
 
-            {/* Add Custom Gap */}
+            {/* Add Your Own */}
             <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                    Add custom gap
+                    Add your own
                 </label>
                 <div className="flex gap-2">
                     <input

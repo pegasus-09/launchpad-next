@@ -13,7 +13,7 @@ const educationOptions = [
 
 const goalOptions = [
     "Explore careers",
-    "Choose a college path",
+    "Choose a university path",
     "Improve skills",
     "Build a resume",
 ]
