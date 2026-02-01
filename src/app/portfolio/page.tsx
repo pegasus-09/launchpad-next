@@ -56,17 +56,18 @@ export default function PortfolioPage() {
                     assessment.raw_answers
                 )
 
-                // Initialize portfolio if it doesn't exist
-                setPortfolio(existingPortfolio || {
-                    strengths: [],
-                    gaps: [],
-                    projects: [],
-                    bio: null
-                })
+                setPortfolio(
+                    existingPortfolio || {
+                        strengths: [],
+                        gaps: [],
+                        projects: [],
+                        bio: null,
+                    }
+                )
                 setAssessmentAnswers(assessment.raw_answers)
                 setAssessmentSuggestions(suggestions)
             } catch (e: any) {
-                console.error('Portfolio initialization error:', e) // Add logging
+                console.error("Portfolio initialization error:", e)
                 setError(e.message ?? "Failed to load portfolio")
             } finally {
                 setLoading(false)
@@ -103,6 +104,58 @@ export default function PortfolioPage() {
             setSaved(true)
         } catch (e: any) {
             setError(e.message ?? "Failed to save portfolio")
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    async function handleSaveAndExport() {
+        setSaving(true)
+        setSaved(false)
+        setError(null)
+
+        const {
+            data: { session },
+        } = await supabase.auth.getSession()
+
+        if (!session) {
+            setError("Not authenticated")
+            setSaving(false)
+            return
+        }
+
+        try {
+            await savePortfolio({
+                user_id: session.user.id,
+                strengths: portfolio.strengths ?? [],
+                gaps: portfolio.gaps ?? [],
+                projects: portfolio.projects ?? [],
+                bio: portfolio.bio ?? null,
+            })
+
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE}/portfolio/export/pdf?user_id=${session.user.id}`
+            )
+
+            if (!res.ok) {
+                throw new Error("Failed to export PDF")
+            }
+
+            const blob = await res.blob()
+            const url = window.URL.createObjectURL(blob)
+
+            const a = document.createElement("a")
+            a.href = url
+            a.download = "portfolio.pdf"
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+
+            window.URL.revokeObjectURL(url)
+
+            setSaved(true)
+        } catch (e: any) {
+            setError(e.message ?? "Failed to save or export portfolio")
         } finally {
             setSaving(false)
         }
@@ -146,18 +199,28 @@ export default function PortfolioPage() {
 
     return (
         <div className="max-w-3xl mx-auto p-6 space-y-8">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
                 <h1 className="text-2xl font-semibold">
                     My Portfolio
                 </h1>
 
-                <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 cursor-pointer"
-                >
-                    {saving ? "Saving…" : "Save / Update"}
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-100 disabled:opacity-50 cursor-pointer"
+                    >
+                        Save
+                    </button>
+
+                    <button
+                        onClick={handleSaveAndExport}
+                        disabled={saving}
+                        className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 cursor-pointer"
+                    >
+                        Save & Export PDF
+                    </button>
+                </div>
             </div>
 
             {saved && (
