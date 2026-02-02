@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/client"
 import LogoutButton from "@/components/auth/LogoutButton"
 import Link from "next/link"
 
@@ -16,6 +16,7 @@ export default function DashboardLayout({ children }: Props) {
 
     useEffect(() => {
         async function checkAuth() {
+            const supabase = createClient()
             const {
                 data: { session },
             } = await supabase.auth.getSession()

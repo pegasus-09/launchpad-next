@@ -1,6 +1,6 @@
 "use client"
 
-import { supabase } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -14,6 +14,7 @@ export default function LogoutButton() {
     setLoading(true)
 
     try {
+      const supabase = createClient()
       await supabase.auth.signOut()
       router.push("/")
     } finally {

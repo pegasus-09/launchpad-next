@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/client"
 
 export default function Navbar() {
   const router = useRouter()
@@ -12,6 +12,8 @@ export default function Navbar() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const supabase = createClient()
+    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
@@ -31,6 +33,7 @@ export default function Navbar() {
   const showBackButton = pathname !== "/" && pathname !== "/dashboard"
 
   async function handleLogout() {
+    const supabase = createClient()
     await supabase.auth.signOut()
     router.push("/")
   }
@@ -43,7 +46,7 @@ export default function Navbar() {
           {showBackButton && (
             <button
               onClick={() => router.back()}
-              className="text-white hover:text-gray-300 text-sm flex items-center gap-1"
+              className="text-white hover:text-gray-300 text-sm flex items-center gap-1 cursor-pointer"
             >
               <span className="text-lg">←</span> Back
             </button>
@@ -82,7 +85,7 @@ export default function Navbar() {
                   </span>
                   <button
                     onClick={handleLogout}
-                    className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-800"
+                    className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-800 cursor-pointer"
                   >
                     Log out
                   </button>
@@ -91,13 +94,13 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/login"
-                    className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-800"
+                    className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-800 cursor-pointer"
                   >
                     Log in
                   </Link>
                   <Link
                     href="/signup"
-                    className="rounded-md bg-violet-500 px-4 py-2 text-sm text-white hover:bg-violet-600"
+                    className="rounded-md bg-violet-500 px-4 py-2 text-sm text-white hover:bg-violet-600 cursor-pointer"
                   >
                     Sign up
                   </Link>

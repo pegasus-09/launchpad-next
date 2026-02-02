@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/client"
 
 const educationOptions = [
     "Middle school",
@@ -37,6 +37,7 @@ export default function OnboardingPage() {
     }
 
     async function finishOnboarding() {
+        const supabase = createClient()
         await supabase.auth.updateUser({
             data: {
                 onboarding_complete: true,

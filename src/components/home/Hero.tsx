@@ -15,10 +15,10 @@ export default function Hero() {
         </p>
 
         <div className="mt-10 flex justify-center gap-4">
-          <Link href="/assessment" className="rounded-lg bg-violet-500 px-6 py-3 font-medium text-white hover:bg-violet-600">
+          <Link href="/assessment" className="rounded-lg bg-violet-500 px-6 py-3 font-medium text-white hover:bg-violet-600 cursor-pointer">
             Take the quiz
           </Link>
-          <a href="#features" className="rounded-lg border border-teal-400 px-6 py-3 font-medium text-teal-500 hover:bg-teal-50">
+          <a href="#features" className="rounded-lg border border-teal-400 px-6 py-3 font-medium text-teal-500 hover:bg-teal-50 cursor-pointer">
             Learn more
           </a>
         </div>

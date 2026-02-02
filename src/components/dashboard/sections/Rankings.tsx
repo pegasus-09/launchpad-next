@@ -102,7 +102,7 @@ export default function Rankings({
                 <div className="mt-4 flex justify-center">
                     <button
                         onClick={() => setShowAll(!showAll)}
-                        className="text-sm text-violet-600 hover:text-violet-700 font-medium hover:underline"
+                        className="text-sm text-violet-600 hover:text-violet-700 font-medium hover:underline cursor-pointer"
                     >
                         {showAll 
                             ? "Show less" 

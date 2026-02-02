@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import AuthLayout from "@/components/auth/AuthLayout";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function LoginContent() {
@@ -26,6 +26,7 @@ function LoginContent() {
         setError(null);
         setLoading(true);
 
+        const supabase = createClient();
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -38,35 +39,6 @@ function LoginContent() {
         }
 
         if (data.session) {
-            // Check if there are guest assessment results to save
-            const guestAnswers = localStorage.getItem('guestAssessmentAnswers')
-            const guestRanking = localStorage.getItem('guestAssessmentRanking')
-
-            if (guestAnswers && guestRanking) {
-                try {
-                    // Save the guest results to the database
-                    const { error: saveError } = await supabase
-                        .from("assessment_results")
-                        .upsert({
-                            user_id: data.session.user.id,
-                            raw_answers: JSON.parse(guestAnswers),
-                            ranking: JSON.parse(guestRanking),
-                            updated_at: new Date().toISOString(),
-                        })
-
-                    if (saveError) {
-                        console.error("Failed to save guest results:", saveError)
-                    } else {
-                        // Clear the stored guest data
-                        localStorage.removeItem('guestAssessmentAnswers')
-                        localStorage.removeItem('guestAssessmentRanking')
-                        localStorage.removeItem('guestAssessmentDate')
-                    }
-                } catch (err) {
-                    console.error("Error saving guest results:", err)
-                }
-            }
-
             router.push("/dashboard")
         }
 

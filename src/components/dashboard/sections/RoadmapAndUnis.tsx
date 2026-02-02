@@ -4,7 +4,7 @@ export default function RoadmapAndUniversities() {
       <div className="rounded-2xl border bg-white p-6 md:ml-10 md:mr-5 sm:mx-10">
         <h3 className="mb-3 font-semibold">Career roadmap</h3>
         <div className="h-32 rounded-lg border bg-gray-50" />
-        <button className="mt-4 text-sm text-violet-500 underline">
+        <button className="mt-4 text-sm text-violet-500 underline cursor-pointer">
           View full roadmap
         </button>
       </div>
