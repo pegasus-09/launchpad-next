@@ -46,16 +46,16 @@ function LoginContent() {
     }
 
     return (
-        <AuthLayout side="left" bgColor="bg-teal-400">
+        <AuthLayout side="left" bgColor="bg-linear-to-br from-violet-500 to-teal-400">
             <h1 className="text-4xl font-bold text-black">
-                <span className="text-teal-400">Log in</span>
+                <span className="text-violet-500">Log in</span>
                 <br />
                 to your account
             </h1>
 
             {message && (
-                <div className="mt-4 rounded-lg bg-blue-50 border border-blue-200 p-3">
-                    <p className="text-sm text-blue-800">{message}</p>
+                <div className="mt-4 rounded-xl bg-violet-50 border border-violet-200 p-3">
+                    <p className="text-sm text-violet-800">{message}</p>
                 </div>
             )}
 
@@ -65,7 +65,7 @@ function LoginContent() {
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-lg border px-5 py-3 text-black"
+                    className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
                 />
 
                 <input
@@ -74,14 +74,14 @@ function LoginContent() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                    className="w-full rounded-lg border px-4 py-3 text-black"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-black focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
                 />
 
                 <button
                     type="button"
                     onClick={handleLogin}
                     disabled={loading}
-                    className="mt-4 w-full rounded-lg border border-teal-400 py-3 font-medium text-teal-500 cursor-pointer hover:bg-teal-50 disabled:opacity-50"
+                    className="mt-4 w-full rounded-xl bg-violet-600 py-3 font-medium text-white cursor-pointer hover:bg-violet-700 disabled:opacity-50 transition-colors"
                 >
                     {loading ? "Logging in..." : "Log in"}
                 </button>
@@ -91,11 +91,6 @@ function LoginContent() {
                 )}
             </div>
 
-            <p className="mt-6 text-sm text-gray-500 hover:text-gray-700">
-                <a href="/signup" className="underline">
-                    I don&apos;t have an account
-                </a>
-            </p>
         </AuthLayout>
     );
 }

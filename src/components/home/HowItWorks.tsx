@@ -1,26 +1,30 @@
 const steps = [
-  "Take the career assessment (no login required)",
-  "Create an account to save and view your results",
-  "Explore your personalised dashboard with career recommendations",
-  "Build your portfolio and export as PDF for applications",
+  { title: "Take the assessment", description: "Complete our comprehensive psychometric quiz - no login required to start" },
+  { title: "Create your account", description: "Sign up to save your results and access your personalised dashboard" },
+  { title: "Explore career matches", description: "View ranked career recommendations based on your unique profile" },
+  { title: "Build your portfolio", description: "Showcase your projects and experiences, export as PDF for applications" },
 ]
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-28 bg-gray-50">
-      <div className="mx-auto max-w-3xl px-6">
-        <h2 className="mb-10 text-3xl font-bold text-black">How it works</h2>
+    <section id="how-it-works" className="py-24 bg-white">
+      <div className="mx-auto max-w-4xl px-6">
+        <h2 className="mb-4 text-3xl md:text-4xl font-bold text-gray-900 text-center">How it works</h2>
+        <p className="mb-12 text-center text-gray-600">Get started in just four simple steps</p>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {steps.map((step, index) => (
             <div
-              key={step}
-              className="flex items-start gap-6 border-b pb-6 last:border-b-0"
+              key={step.title}
+              className="flex items-start gap-6 p-6 rounded-2xl bg-linear-to-r from-violet-50/50 to-teal-50/50 border border-gray-100 hover:border-violet-200 transition-all"
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-violet-500 text-xl font-bold text-white">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-violet-600 text-xl font-bold text-white shadow-lg shadow-violet-200">
                 {index + 1}
               </div>
-              <p className="text-lg text-gray-700 pt-2">{step}</p>
+              <div className="pt-1">
+                <h3 className="font-semibold text-gray-900 text-lg">{step.title}</h3>
+                <p className="text-gray-600 mt-1">{step.description}</p>
+              </div>
             </div>
           ))}
         </div>

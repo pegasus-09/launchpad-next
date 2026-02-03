@@ -39,32 +39,30 @@ export default function Navbar() {
   }
 
   return (
-    <header className="w-full border-b border-gray-200 bg-gray-900 text-white">
+    <header className="w-full border-b border-gray-800 bg-gray-900 text-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo with back button */}
         <div className="flex items-center gap-4">
           {showBackButton && (
             <button
               onClick={() => router.back()}
-              className="text-white hover:text-gray-300 text-sm flex items-center gap-1 cursor-pointer"
+              className="text-gray-300 hover:text-white text-sm flex items-center gap-1 cursor-pointer transition-colors"
             >
               <span className="text-lg">←</span> Back
             </button>
           )}
           <Link href="/" className="text-lg font-bold font-mono">
-            launchpad
+            <span className="text-violet-400">launch</span>
+            <span className="text-teal-400">pad</span>
           </Link>
         </div>
 
         {/* Navigation */}
         <nav className="flex items-center gap-6 text-sm">
-          <Link href="/assessment" className="text-white hover:text-gray-300">
-            Quiz
-          </Link>
-          <a href="#features" className="text-white hover:text-gray-300">
+          <a href="#features" className="text-gray-300 hover:text-white transition-colors">
             About
           </a>
-          <a href="#how-it-works" className="text-white hover:text-gray-300">
+          <a href="#how-it-works" className="text-gray-300 hover:text-white transition-colors">
             How It Works
           </a>
 
@@ -75,36 +73,28 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/dashboard"
-                    className="text-white hover:text-gray-300"
+                    className="text-gray-300 hover:text-white transition-colors"
                   >
                     Dashboard
                   </Link>
-                  <span className="text-gray-400">•</span>
-                  <span className="text-sm text-gray-300">
+                  <span className="text-gray-600">•</span>
+                  <span className="text-sm text-gray-400">
                     {user.email?.split("@")[0] || "User"}
                   </span>
                   <button
                     onClick={handleLogout}
-                    className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-800 cursor-pointer"
+                    className="rounded-lg border border-gray-600 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:border-gray-500 cursor-pointer transition-all"
                   >
                     Log out
                   </button>
                 </>
               ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-800 cursor-pointer"
-                  >
-                    Log in
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="rounded-md bg-violet-500 px-4 py-2 text-sm text-white hover:bg-violet-600 cursor-pointer"
-                  >
-                    Sign up
-                  </Link>
-                </>
+                <Link
+                href="/login"
+                className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium hover:bg-violet-700 transition-colors"
+              >
+                Log in
+              </Link>
               )}
             </div>
           )}

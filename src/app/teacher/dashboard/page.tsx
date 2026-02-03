@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { teacherApi } from "@/lib/api"
 import { requireRole } from "@/lib/auth/roleCheck"
+import LogoutButton from "@/components/auth/LogoutButton"
 
 interface Student {
   id: string
@@ -42,9 +43,9 @@ export default function TeacherDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-violet-50 to-teal-50">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-4"></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mb-4"></div>
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -63,35 +64,41 @@ export default function TeacherDashboard() {
   }
 
   return (
+    <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
     <div className="max-w-6xl mx-auto p-6 space-y-8">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Teacher Dashboard
-        </h1>
-        <p className="text-gray-600">
-          Manage and monitor your students' career development
-        </p>
+      <div className="bg-white rounded-2xl shadow-sm p-8 border border-violet-100">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Teacher Dashboard
+            </h1>
+            <p className="text-gray-600">
+              Manage and monitor your students' career development
+            </p>
+          </div>
+          <LogoutButton />
+        </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="text-3xl font-bold text-blue-600 mb-2">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-violet-100 hover:border-violet-300 transition-all hover:shadow-md">
+          <div className="text-3xl font-bold text-violet-600 mb-2">
             {students.length}
           </div>
           <div className="text-sm text-gray-600">Total Students</div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="text-3xl font-bold text-green-600 mb-2">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-teal-100 hover:border-teal-300 transition-all hover:shadow-md">
+          <div className="text-3xl font-bold text-teal-600 mb-2">
             {students.filter(s => s.subjects && s.subjects.length > 0).length}
           </div>
           <div className="text-sm text-gray-600">Active in Subjects</div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="text-3xl font-bold text-purple-600 mb-2">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-violet-100 hover:border-violet-300 transition-all hover:shadow-md">
+          <div className="text-3xl font-bold text-violet-500 mb-2">
             {new Set(students.map(s => s.year_level)).size}
           </div>
           <div className="text-sm text-gray-600">Year Levels</div>
@@ -99,7 +106,7 @@ export default function TeacherDashboard() {
       </div>
 
       {/* Students List */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
         <h2 className="text-2xl font-semibold text-gray-900 mb-4">
           My Students
         </h2>
@@ -118,7 +125,7 @@ export default function TeacherDashboard() {
             {students.map((student) => (
               <div
                 key={student.id}
-                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
+                className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-violet-300 hover:shadow-sm transition-all cursor-pointer"
                 onClick={() => router.push(`/teacher/student/${student.id}`)}
               >
                 <div>
@@ -129,7 +136,7 @@ export default function TeacherDashboard() {
                       {student.subjects.map((subject, idx) => (
                         <span
                           key={idx}
-                          className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded"
+                          className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-full font-medium"
                         >
                           {subject}
                         </span>
@@ -139,7 +146,7 @@ export default function TeacherDashboard() {
                 </div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-400"
+                  className="h-5 w-5 text-violet-400"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -154,6 +161,7 @@ export default function TeacherDashboard() {
           </div>
         )}
       </div>
+    </div>
     </div>
   )
 }

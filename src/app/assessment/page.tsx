@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { studentApi } from "@/lib/api"
 import { createClient } from "@/lib/supabase/client"
-import { studentApi, guestApi } from "@/lib/api"
-import { getCurrentUserProfile } from "@/lib/auth/roleCheck"
 
 // Import your assessment questions
 // Adjust this path to match your actual file location
@@ -12,24 +11,54 @@ import { QUESTIONS } from "@/lib/assessmentQuestions"
 
 export default function AssessmentPage() {
   const router = useRouter()
-  const supabase = createClient()
 
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [currentSection, setCurrentSection] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
-  const [userRole, setUserRole] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Check authentication status
+  // Check authentication and role - only students can access this page
   useEffect(() => {
     async function checkAuth() {
-      const profile = await getCurrentUserProfile()
-      setIsAuthenticated(!!profile)
-      setUserRole(profile?.role || null)
+      const supabase = createClient()
+
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        router.push('/login')
+        return
+      }
+
+      // Get user profile to check role
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single()
+
+      if (profileError || !profile) {
+        router.push('/login')
+        return
+      }
+
+      // Only allow students to access this page
+      if (profile.role !== 'student') {
+        // Redirect non-students to their appropriate dashboard
+        if (profile.role === 'teacher') {
+          router.push('/teacher/dashboard')
+        } else if (profile.role === 'admin') {
+          router.push('/admin/dashboard')
+        } else {
+          router.push('/login')
+        }
+        return
+      }
+
+      setIsLoading(false)
     }
     checkAuth()
-  }, [])
+  }, [router])
 
   // Organize questions by section
   const sections = [
@@ -56,18 +85,8 @@ export default function AssessmentPage() {
     setError(null)
 
     try {
-      if (isAuthenticated) {
-        // Authenticated student - save to database
-        await studentApi.submitAssessment(answers)
-        router.push('/dashboard')
-      } else {
-        // Guest - show preview only
-        const result = await guestApi.submitAssessment(answers)
-        
-        // Store result in session storage for preview page
-        sessionStorage.setItem('guestAssessmentResult', JSON.stringify(result))
-        router.push('/assessment/preview')
-      }
+      await studentApi.submitAssessment(answers)
+      router.push('/dashboard')
     } catch (err: any) {
       console.error('Assessment submission error:', err)
       setError(err.message || 'Failed to submit assessment')
@@ -89,8 +108,19 @@ export default function AssessmentPage() {
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-violet-50 to-teal-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50 py-8">
       <div className="max-w-3xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
@@ -110,9 +140,9 @@ export default function AssessmentPage() {
                 key={idx}
                 className={`text-xs ${
                   idx === currentSection
-                    ? 'text-blue-600 font-semibold'
+                    ? 'text-violet-600 font-semibold'
                     : idx < currentSection
-                    ? 'text-green-600'
+                    ? 'text-teal-600'
                     : 'text-gray-400'
                 }`}
               >
@@ -120,9 +150,9 @@ export default function AssessmentPage() {
               </div>
             ))}
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-linear-to-r from-violet-500 to-teal-500 h-2.5 rounded-full transition-all duration-300"
               style={{
                 width: `${((currentSection + 1) / sections.length) * 100}%`,
               }}
@@ -131,16 +161,16 @@ export default function AssessmentPage() {
         </div>
 
         {/* Questions */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm p-8 mb-6 border border-gray-100">
+          <div className="space-y-8">
             {currentQuestions.map((question) => (
-              <div key={question.id} className="border-b border-gray-200 pb-6 last:border-0">
+              <div key={question.id} className="border-b border-gray-100 pb-8 last:border-0 last:pb-0">
                 <label className="block mb-4">
                   <span className="text-gray-900 font-medium">{question.text}</span>
                 </label>
                 <div className="flex justify-between items-center gap-2">
                   <span className="text-sm text-gray-500">Strongly Disagree</span>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     {[1, 2, 3, 4, 5].map((value) => (
                       <button
                         key={value}
@@ -149,11 +179,11 @@ export default function AssessmentPage() {
                           setAnswers({ ...answers, [question.id]: value })
                         }
                         className={`
-                          w-12 h-12 rounded-full border-2 transition-all cursor-pointer
+                          w-12 h-12 rounded-full border-2 transition-all cursor-pointer font-medium
                           ${
                             answers[question.id] === value
-                              ? 'border-blue-600 bg-blue-600 text-white'
-                              : 'border-gray-300 hover:border-blue-400'
+                              ? 'border-violet-600 bg-violet-600 text-white shadow-md'
+                              : 'border-gray-300 hover:border-violet-400 hover:bg-violet-50'
                           }
                         `}
                       >
@@ -170,21 +200,8 @@ export default function AssessmentPage() {
 
         {/* Error message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
             <p className="text-red-800 text-sm">{error}</p>
-          </div>
-        )}
-
-        {/* Guest notice */}
-        {!isAuthenticated && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-yellow-800 text-sm">
-              📌 You're taking the assessment as a guest. You'll see a preview of your top career matches.
-              <a href="/login" className="underline ml-1 font-medium">
-                Log in
-              </a>
-              {" "}to save your full results.
-            </p>
           </div>
         )}
 
@@ -193,7 +210,7 @@ export default function AssessmentPage() {
           <button
             onClick={handlePrevious}
             disabled={currentSection === 0}
-            className="px-6 py-2 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="px-6 py-3 text-gray-700 hover:text-violet-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors font-medium"
           >
             ← Previous
           </button>
@@ -202,7 +219,7 @@ export default function AssessmentPage() {
             <button
               onClick={handleNext}
               disabled={!canProceed}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="px-8 py-3 bg-violet-600 text-white rounded-xl hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors font-medium"
             >
               Next →
             </button>
@@ -210,7 +227,7 @@ export default function AssessmentPage() {
             <button
               onClick={handleSubmit}
               disabled={!allQuestionsAnswered || isSubmitting}
-              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="px-8 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors font-medium"
             >
               {isSubmitting ? 'Submitting...' : 'Submit Assessment'}
             </button>

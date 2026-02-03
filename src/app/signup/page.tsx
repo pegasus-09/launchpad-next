@@ -60,16 +60,16 @@ function SignupContent() {
   }
 
   return (
-    <AuthLayout side="right" bgColor="bg-violet-500">
+    <AuthLayout side="right" bgColor="bg-linear-to-br from-teal-400 to-violet-500">
       <h1 className="text-4xl font-bold text-black">
-        <span className="text-violet-500">Sign up</span>
+        <span className="text-teal-500">Sign up</span>
         <br />
         for an account
       </h1>
 
       {message && (
-        <div className="mt-4 rounded-lg bg-blue-50 border border-blue-200 p-3">
-          <p className="text-sm text-blue-800">{message}</p>
+        <div className="mt-4 rounded-xl bg-teal-50 border border-teal-200 p-3">
+          <p className="text-sm text-teal-800">{message}</p>
         </div>
       )}
 
@@ -79,7 +79,7 @@ function SignupContent() {
           placeholder="Full Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-lg border px-5 py-3 text-black"
+          className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
         />
 
         <input
@@ -87,7 +87,7 @@ function SignupContent() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-lg border px-5 py-3 text-black"
+          className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
         />
 
         <input
@@ -95,13 +95,13 @@ function SignupContent() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-lg border px-4 py-3 text-black"
+          className="w-full rounded-xl border border-gray-200 px-4 py-3 text-black focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
         />
 
         <select
           value={educationLevel}
           onChange={(e) => setEducationLevel(e.target.value)}
-          className="w-full rounded-lg border px-5 py-3 text-black"
+          className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
         >
           <option value="">Select Education Level</option>
           <option value="high_school">High School</option>
@@ -114,7 +114,7 @@ function SignupContent() {
           type="button"
           onClick={handleSignup}
           disabled={loading}
-          className="mt-4 w-full rounded-lg bg-violet-500 py-3 font-medium text-white cursor-pointer hover:bg-violet-600 disabled:opacity-50"
+          className="mt-4 w-full rounded-xl bg-teal-600 py-3 font-medium text-white cursor-pointer hover:bg-teal-700 disabled:opacity-50 transition-colors"
         >
           {loading ? "Signing up..." : "Sign up"}
         </button>
@@ -124,8 +124,8 @@ function SignupContent() {
         )}
       </div>
 
-      <p className="mt-6 text-sm text-gray-500 hover:text-gray-700">
-        <a href="/login" className="underline">
+      <p className="mt-6 text-sm text-gray-500">
+        <a href="/login" className="text-violet-600 hover:text-violet-700 font-medium">
           I already have an account
         </a>
       </p>

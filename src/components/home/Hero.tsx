@@ -1,31 +1,28 @@
-import Link from "next/link"
+import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden py-40 bg-white">
-      <div className="mx-auto max-w-3xl px-6 text-center white">
-        <h1 className="text-5xl font-extrabold tracking-tight text-black">
+    <section className="relative overflow-hidden py-32 bg-linear-to-b from-white via-violet-50/30 to-teal-50/30">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(139,92,246,0.08),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(20,184,166,0.08),transparent_50%)]" />
+      <div className="relative mx-auto max-w-4xl px-6 text-center">
+        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900">
           Discover your perfect career with{" "}
-          <span className="text-violet-500">Launchpad</span>
+          <span className="bg-linear-to-r from-violet-600 to-teal-500 bg-clip-text text-transparent">Launchpad</span>
         </h1>
 
-        <p className="mt-6 text-lg text-gray-600">
+        <p className="mt-6 text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
           Take our psychometric assessment to get personalised career recommendations
           based on your unique strengths, interests, and values.
         </p>
 
         <div className="mt-10 flex justify-center gap-4">
-          <Link href="/assessment" className="rounded-lg bg-violet-500 px-6 py-3 font-medium text-white hover:bg-violet-600 cursor-pointer">
-            Take the quiz
+          <Link href="/login" className="rounded-xl bg-violet-600 px-8 py-3 font-medium text-white hover:bg-violet-700 cursor-pointer transition-colors shadow-lg shadow-violet-200">
+            Get started
           </Link>
-          <a href="#features" className="rounded-lg border border-teal-400 px-6 py-3 font-medium text-teal-500 hover:bg-teal-50 cursor-pointer">
+          <Link href="#features" className="rounded-xl border-2 border-teal-400 px-8 py-3 font-medium text-teal-600 hover:bg-teal-50 cursor-pointer transition-colors">
             Learn more
-          </a>
+          </Link>
         </div>
-
-        <p className="mt-4 text-sm text-gray-500">
-          No login required to start • Get instant results
-        </p>
       </div>
     </section>
   )

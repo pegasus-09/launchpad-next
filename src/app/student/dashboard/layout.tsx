@@ -46,7 +46,7 @@ export default function DashboardLayout({ children }: Props) {
     const navItems: NavItem[] = [
         { id: 1, label: 'Dashboard', href: '/dashboard' },
         { id: 2, label: 'Assessment', href: '/assessment' },
-        { id: 3, label: 'Portfolio', href: '/portfolio' }
+        // { id: 3, label: 'Portfolio', href: '/portfolio' }
     ];
 
     return (
@@ -77,7 +77,7 @@ export default function DashboardLayout({ children }: Props) {
             </aside>
 
             {/* Main content */}
-            <main className="ml-64 flex-1 overflow-y-auto px-8 py-10">
+            <main className="ml-64 flex-1 overflow-y-auto">
                 {children}
             </main>
         </div>
