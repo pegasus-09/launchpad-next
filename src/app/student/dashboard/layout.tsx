@@ -50,20 +50,21 @@ export default function DashboardLayout({ children }: Props) {
     ];
 
     return (
-        <div className="flex h-screen bg-gray-50 text-black">
+        <div className="flex h-screen bg-gray-500 text-white">
             {/* Sidebar */}
-            <aside className="fixed inset-y-0 left-0 flex w-64 flex-col border-r bg-white px-4 py-6">
-                <div className="flex flex-col">
-                    <h2 className="mb-8 text-xl font-bold font-mono">
-                        launchpad
-                    </h2>
+            <aside className="fixed inset-y-0 left-0 flex w-64 flex-col border-r bg-gray-900 px-4 py-6">
+                <div className="flex flex-col space-y-7.5">
+                    <Link href="/student/dashboard" className="text-3xl font-bold font-mono">
+                        <span className="text-violet-400">launch</span>
+                        <span className="text-teal-400">pad</span>
+                    </Link>
 
-                    <nav className="space-y-2 text-sm">
+                    <nav className="space-y-2 text-md">
                         {navItems.map((item) => (
                             <Link
                                 key={item.id}
                                 href={item.href}
-                                className="block rounded px-3 py-2 hover:bg-gray-100"
+                                className="block rounded px-3 py-2 hover:bg-gray-800"
                             >
                                 {item.label}
                             </Link>
@@ -72,7 +73,7 @@ export default function DashboardLayout({ children }: Props) {
                 </div>
 
                 <div className="mt-auto pt-6">
-                    <LogoutButton />
+                    <LogoutButton variant="dark"/>
                 </div>
             </aside>
 

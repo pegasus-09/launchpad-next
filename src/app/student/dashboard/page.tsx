@@ -2,15 +2,17 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { studentApi } from "@/lib/api"
+import { authApi, studentApi } from "@/lib/api"
 import { requireRole } from "@/lib/auth/roleCheck"
 import { normaliseRankingScore } from "@/lib/normalise"
+import { createClient } from "@/lib/supabase/client"
 
 interface ProfileData {
   profile: {
     full_name: string
     email: string
     year_level?: string
+    school_name?: string
   }
   assessment?: {
     ranking: Array<[string, string, number]>
@@ -31,10 +33,19 @@ export default function StudentDashboard() {
     async function loadData() {
       try {
         // Check authentication and role
-        await requireRole('student')
+        const userProfile = await requireRole('student')
         
         // Load student profile
         const data = await studentApi.getProfile()
+        
+        // Get school name
+        const schoolData = await authApi.getSchool(userProfile)
+
+        // Add school name to profile data
+        if (schoolData) {
+          data.profile.school_name = schoolData.name
+        }
+
         setProfileData(data)
       } catch (err: any) {
         console.error('Dashboard error:', err)
@@ -80,15 +91,14 @@ export default function StudentDashboard() {
     )
   }
 
-  // ✅ FIXED: Look for 'assessment' not 'assessment_results'
   const hasAssessment = !!profileData.assessment
   const ranking = profileData.assessment?.ranking || []
   const workExperiences = profileData.work_experiences || []
   const projects = profileData.projects || []
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
+    <div className="bg-linear-to-br from-violet-50 via-white to-teal-50">
+    <div className="max-w-6xl mx-auto p-6 pb-12 space-y-8">
       {/* Header */}
       <div className="bg-white rounded-2xl shadow-sm p-8 border border-violet-100">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -96,6 +106,9 @@ export default function StudentDashboard() {
         </h1>
         <p className="text-gray-600">
           {profileData.profile.year_level ? `Year ${profileData.profile.year_level}` : 'Student'} Dashboard
+          {profileData.profile.school_name && (
+            <span className="ml-2">• {profileData.profile.school_name}</span>
+          )}
         </p>
       </div>
 
@@ -130,7 +143,7 @@ export default function StudentDashboard() {
             </div>
             <button
               onClick={() => router.push('/assessment')}
-              className="text-sm cursor-pointer text-violet-600 hover:text-violet-700 font-medium"
+              className="text-md border px-2.5 py-2 rounded-md cursor-pointer text-violet-600 hover:bg-violet-100 font-medium"
             >
               Retake Assessment
             </button>
@@ -140,7 +153,7 @@ export default function StudentDashboard() {
             <p className="text-gray-600">No career matches found.</p>
           ) : (
             <div className="space-y-3">
-              {ranking.slice(0, 10).map(([code, title, score], index) => (
+              {ranking.slice(0, 5).map(([code, title, score], index) => (
                 <div
                   key={code}
                   className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-violet-300 hover:shadow-sm transition-all"

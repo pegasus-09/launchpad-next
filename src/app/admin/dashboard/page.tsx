@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { adminApi } from "@/lib/api"
-import { requireRole } from "@/lib/auth/roleCheck"
+import { adminApi, authApi } from "@/lib/api"
+import { getCurrentUserProfile, requireRole } from "@/lib/auth/roleCheck"
 import LogoutButton from "@/components/auth/LogoutButton"
 
 interface Student {
@@ -19,29 +19,41 @@ export default function AdminDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [students, setStudents] = useState<Student[]>([])
+  const [schoolName, setSchoolName] = useState<string>("")
+  const [stats, setStats] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // Check authentication and role
-        await requireRole('admin')
-        
-        // Load students only (stats endpoint doesn't exist yet)
-        const studentsData = await adminApi.getAllStudents()
-        
-        setStudents(studentsData.students || [])
-      } catch (err: any) {
-        console.error('Admin dashboard error:', err)
-        setError(err.message || 'Failed to load dashboard')
-      } finally {
-        setLoading(false)
-      }
-    }
+    useEffect(() => {
+        async function loadData() {
+            try {
+                // Check authentication and role
+                const userProfile = await requireRole('admin')
+                
+                // Get school name
+                const schoolData = await authApi.getSchool(userProfile)
+                if (schoolData) {
+                setSchoolName(schoolData.name)
+                }
+                
+                // Load students AND stats
+                const [studentsData, statsData] = await Promise.all([
+                adminApi.getAllStudents(),
+                adminApi.getSchoolStats()  // ← Add this
+                ])
+                
+                setStudents(studentsData.students || [])
+                setStats(statsData)  // ← Add this
+            } catch (err: any) {
+                console.error('Admin dashboard error:', err)
+                setError(err.message || 'Failed to load dashboard')
+            } finally {
+                setLoading(false)
+            }
+        }
 
-    loadData()
-  }, [])
+        loadData()
+    }, [])
 
   if (loading) {
     return (
@@ -82,10 +94,10 @@ export default function AdminDashboard() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Admin Dashboard
+            Admin Dashboard
             </h1>
             <p className="text-gray-600">
-              School-wide overview and student management
+              {schoolName ? schoolName : 'No school assigned'}
             </p>
           </div>
           <LogoutButton />
@@ -96,28 +108,28 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl shadow-sm p-6 border border-violet-100 hover:border-violet-300 transition-all hover:shadow-md">
           <div className="text-3xl font-bold text-violet-600 mb-2">
-            {totalStudents}
+            {stats?.total_students || totalStudents}
           </div>
           <div className="text-sm text-gray-600">Total Students</div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-6 border border-teal-100 hover:border-teal-300 transition-all hover:shadow-md">
           <div className="text-3xl font-bold text-teal-600 mb-2">
-            {completedAssessments}
+            {stats?.completed_assessments || completedAssessments}
           </div>
           <div className="text-sm text-gray-600">Completed Assessments</div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-6 border border-violet-100 hover:border-violet-300 transition-all hover:shadow-md">
           <div className="text-3xl font-bold text-violet-500 mb-2">
-            -
+            {stats?.active_teachers || '-'}
           </div>
           <div className="text-sm text-gray-600">Active Teachers</div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-6 border border-teal-100 hover:border-teal-300 transition-all hover:shadow-md">
           <div className="text-3xl font-bold text-teal-500 mb-2">
-            -
+            {stats?.total_subjects || '-'}
           </div>
           <div className="text-sm text-gray-600">Total Subjects</div>
         </div>

@@ -2,6 +2,8 @@
 // Backend API client with authentication and role-based endpoints
 
 import { createClient } from '@/lib/supabase/client'
+import { getCurrentUserProfile, UserProfile } from './auth/roleCheck'
+import { use } from 'react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -56,6 +58,28 @@ export const guestApi = {
 
     return response.json()
   },
+}
+
+// ============================================================================
+// AUTHENTICATED API (Requires user to be logged in)
+// ============================================================================
+export const authApi = {
+  /**
+   * Get current user's profile
+   */
+  async getSchool(userProfile: UserProfile) {
+    const supabase = createClient()
+    if (userProfile === null) {
+      throw new Error('Not authenticated')
+    }
+    const { data: schoolData } = await supabase
+          .from('schools')
+          .select('name')
+          .eq('id', userProfile.school_id)
+          .single()
+    return schoolData
+  },
+
 }
 
 // ============================================================================

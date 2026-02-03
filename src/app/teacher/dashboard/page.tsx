@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { teacherApi } from "@/lib/api"
+import { teacherApi, authApi } from "@/lib/api"
 import { requireRole } from "@/lib/auth/roleCheck"
 import LogoutButton from "@/components/auth/LogoutButton"
 
@@ -18,6 +18,7 @@ export default function TeacherDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [students, setStudents] = useState<Student[]>([])
+  const [schoolName, setSchoolName] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null)
 
@@ -25,11 +26,17 @@ export default function TeacherDashboard() {
     async function loadData() {
       try {
         // Check authentication and role
-        await requireRole('teacher')
+        const userProfile = await requireRole('teacher')
         
         // Load students
         const data = await teacherApi.getStudents()
         setStudents(data.students || [])
+        // Get school name
+        const schoolData = await authApi.getSchool(userProfile)
+        if (schoolData) {
+          setSchoolName(schoolData.name)
+        }
+
       } catch (err: any) {
         console.error('Teacher dashboard error:', err)
         setError(err.message || 'Failed to load dashboard')
@@ -74,7 +81,7 @@ export default function TeacherDashboard() {
               Teacher Dashboard
             </h1>
             <p className="text-gray-600">
-              Manage and monitor your students' career development
+              {schoolName ? schoolName : 'No school assigned'}
             </p>
           </div>
           <LogoutButton />
