@@ -123,7 +123,7 @@ export default function StudentDashboard() {
           </p>
           <button
             onClick={() => router.push('/assessment')}
-            className="px-6 py-3 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors font-medium"
+            className="px-5 py-2.5 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors font-medium cursor-pointer"
           >
             Start Assessment
           </button>

@@ -143,7 +143,7 @@ export default function AdminDashboard() {
           </h2>
           <button
             onClick={() => router.push('/admin/add-student')}
-            className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors font-medium"
+            className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors font-medium cursor-pointer"
           >
             + Add Student
           </button>
@@ -207,7 +207,7 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3 text-sm">
                       <button
                         onClick={() => router.push(`/admin/student/${student.id}`)}
-                        className="text-violet-600 hover:text-violet-700 font-medium"
+                        className="text-violet-600 hover:text-violet-700 font-medium hover:underline cursor-pointer"
                       >
                         View
                       </button>

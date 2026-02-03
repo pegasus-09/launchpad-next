@@ -6,7 +6,7 @@ export type Question = {
 export const QUESTIONS: Question[] = [
     { id: "A1", text: "I am good with numbers and quantitative problems." },
     { id: "A2", text: "I understand written material quickly." },
-    { id: "A3", text: "I can visualize objects or spaces in my mind." },
+    { id: "A3", text: "I can visualise objects or spaces in my mind." },
     { id: "A4", text: "I can reason through problems step by step." },
     { id: "A5", text: "I can remember information accurately over time." },
 
@@ -17,7 +17,7 @@ export const QUESTIONS: Question[] = [
     { id: "I5", text: "I care deeply about helping others or society." },
     { id: "I6", text: "I enjoy hands-on or practical work." },
 
-    { id: "T1", text: "I enjoy analyzing problems deeply." },
+    { id: "T1", text: "I enjoy analysing problems deeply." },
     { id: "T2", text: "I enjoy generating new ideas or approaches." },
     { id: "T3", text: "I enjoy interacting with people." },
     { id: "T4", text: "I am comfortable taking the lead." },
