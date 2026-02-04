@@ -22,7 +22,7 @@ export default function AddStudentPage() {
     async function checkAuth() {
       try {
         await requireRole('admin')
-      } catch (err) {
+      } catch {
         router.push('/admin/')
       }
     }
@@ -73,8 +73,12 @@ export default function AddStudentPage() {
         router.push('/admin/')
       }, 2000)
 
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Failed to add student')
+      }
     } finally {
       setLoading(false)
     }

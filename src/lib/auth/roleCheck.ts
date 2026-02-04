@@ -2,7 +2,6 @@
 // Role-based route protection utilities
 
 import { createClient } from '@/lib/supabase/client'
-import { redirect } from 'next/navigation'
 
 export type UserRole = 'student' | 'teacher' | 'admin'
 
@@ -15,28 +14,56 @@ export interface UserProfile {
   year_level?: string
 }
 
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    (error as { name?: string }).name === 'AbortError'
+  )
+}
+
 /**
  * Get current user's profile with role
  * Returns null if not authenticated
  */
 export async function getCurrentUserProfile(): Promise<UserProfile | null> {
   const supabase = createClient()
-  
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) return null
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, role, full_name, email, school_id, year_level')
-    .eq('id', session.user.id)
-    .single()
-
-  if (error || !data) {
-    console.error('Failed to load profile:', error)
+  let session = null
+  try {
+    const { data } = await supabase.auth.getSession()
+    session = data.session ?? null
+  } catch (error) {
+    if (isAbortError(error)) {
+      return null
+    }
+    console.error('Failed to get session:', error)
     return null
   }
 
-  return data as UserProfile
+  if (!session) return null
+
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, role, full_name, email, school_id, year_level')
+      .eq('id', session.user.id)
+      .single()
+
+    if (error || !data) {
+      console.error('Failed to load profile:', error)
+      return null
+    }
+
+    return data as UserProfile
+  } catch (error) {
+    if (isAbortError(error)) {
+      return null
+    }
+    console.error('Failed to load profile:', error)
+    return null
+  }
 }
 
 /**
@@ -46,7 +73,7 @@ export async function requireAuth(): Promise<UserProfile> {
   const profile = await getCurrentUserProfile()
   
   if (!profile) {
-    redirect('/login')
+    throw new Error('Not authenticated')
   }
   
   return profile
@@ -61,8 +88,7 @@ export async function requireRole(allowedRoles: UserRole | UserRole[]): Promise<
   const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles]
   
   if (!roles.includes(profile.role)) {
-    // Redirect to appropriate dashboard based on actual role
-    redirect(getRoleDashboard(profile.role))
+    throw new Error('Unauthorized')
   }
   
   return profile

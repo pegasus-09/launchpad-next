@@ -3,13 +3,15 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
-import { ArrowLeft, Search, UserPlus, CheckCircle, XCircle } from 'lucide-react'
+import { ArrowLeft, Search, CheckCircle, XCircle, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 
 interface Student {
   id: string
   full_name: string
   email: string
   year_level: string
+  class_name?: string
+  class_id?: string
   has_assessment: boolean
   subjects_count?: number
 }
@@ -21,6 +23,7 @@ export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([])
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null)
 
   useEffect(() => {
     loadStudents()
@@ -29,10 +32,14 @@ export default function StudentsPage() {
   async function loadStudents() {
     try {
       setLoading(true)
-      const response = await adminApi.getAllStudents()
+      const response = (await adminApi.getAllStudents()) as { students?: Student[] }
       setStudents(response.students || [])
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Failed to load students')
+      }
     } finally {
       setLoading(false)
     }
@@ -42,6 +49,20 @@ export default function StudentsPage() {
     student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     student.email.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  async function handleDeleteStudent(studentId: string) {
+    if (!confirm('Delete this student? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      await adminApi.deleteStudent(studentId)
+      setStudents(prev => prev.filter(s => s.id !== studentId))
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      alert('Failed to delete student: ' + message)
+    }
+  }
 
   if (loading) {
     return (
@@ -113,23 +134,61 @@ export default function StudentsPage() {
                 className="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer overflow-hidden border border-violet-100 hover:border-violet-300"
               >
                 <div className="p-6">
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start justify-between mb-3 gap-3">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         {student.full_name}
                       </h3>
                       <p className="text-sm text-gray-600">{student.email}</p>
                     </div>
-                    {student.has_assessment ? (
-                      <CheckCircle className="w-5 h-5 text-teal-500" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-gray-300" />
-                    )}
+                    <div className="flex items-center gap-2">
+                      {student.has_assessment ? (
+                        <CheckCircle className="w-5 h-5 text-teal-500" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-gray-300" />
+                      )}
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            setActiveMenuId(activeMenuId === student.id ? null : student.id)
+                          }}
+                          className="p-1.5 rounded-md hover:bg-violet-50 text-gray-500 hover:text-violet-600 transition-colors"
+                          aria-label="Open student actions"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                        {activeMenuId === student.id && (
+                          <div
+                            className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => router.push(`/admin/student/${student.id}/edit`)}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-violet-50"
+                            >
+                              <Pencil className="w-4 h-4 text-violet-600" />
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteStudent(student.id)}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-4 pt-3 border-t border-gray-100">
                     <span className="px-3 py-1 bg-violet-100 text-violet-700 text-sm rounded-full font-medium">
-                      Year {student.year_level}
+                      Class {student.class_name || student.year_level}
                     </span>
                     {student.has_assessment && (
                       <span className="text-xs text-teal-600 font-medium">

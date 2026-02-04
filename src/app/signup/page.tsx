@@ -1,6 +1,6 @@
 "use client";
 // TODO: improve make the visual section on the side smaller
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import AuthLayout from "@/components/auth/AuthLayout";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -12,17 +12,9 @@ function SignupContent() {
   const [educationLevel, setEducationLevel] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-
   const router = useRouter();
   const searchParams = useSearchParams()
-
-  useEffect(() => {
-    const msg = searchParams.get('message')
-    if (msg) {
-      setMessage(msg)
-    }
-  }, [searchParams])
+  const message = searchParams.get('message')
 
   async function handleSignup() {
     setError(null);

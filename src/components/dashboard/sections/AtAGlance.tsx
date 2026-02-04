@@ -14,7 +14,7 @@ export default function AtAGlance({ ranking }: AtAGlanceProps) {
     return null
   }
 
-  const [code, title, score] = topCareer
+  const [, title, score] = topCareer
   const percentage = normaliseRankingScore(score)
 
   return (

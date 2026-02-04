@@ -3,7 +3,7 @@
 // UPDATED VERSION with admin teacher/subject/reports endpoints
 
 import { createClient } from '@/lib/supabase/client'
-import { getCurrentUserProfile, UserProfile } from './auth/roleCheck'
+import { UserProfile } from './auth/roleCheck'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -213,6 +213,43 @@ export const adminApi = {
     if (!response.ok) {
       const error = await response.text()
       throw new Error(`Failed to load student profile: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Update student profile (name/year/class)
+   */
+  async updateStudent(studentId: string, data: {
+    full_name?: string
+    year_level?: string
+    class_id?: string | null
+  }) {
+    const response = await authenticatedFetch(`/admin/student/${studentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to update student: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Delete student
+   */
+  async deleteStudent(studentId: string) {
+    const response = await authenticatedFetch(`/admin/student/${studentId}`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to delete student: ${error}`)
     }
 
     return response.json()

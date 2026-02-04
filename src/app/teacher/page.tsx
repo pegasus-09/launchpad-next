@@ -20,7 +20,6 @@ export default function TeacherDashboard() {
   const [students, setStudents] = useState<Student[]>([])
   const [schoolName, setSchoolName] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [selectedStudent, setSelectedStudent] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -37,9 +36,13 @@ export default function TeacherDashboard() {
           setSchoolName(schoolData.name)
         }
 
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Teacher dashboard error:', err)
-        setError(err.message || 'Failed to load dashboard')
+        if (err instanceof Error) {
+          setError(err.message || 'Failed to load dashboard')
+        } else {
+          setError('Failed to load dashboard')
+        }
       } finally {
         setLoading(false)
       }

@@ -1,5 +1,11 @@
+interface PortfolioSummary {
+  strengths?: string[]
+  gaps?: string[]
+  projects?: Array<{ id?: string }>
+}
+
 interface NextStepsProps {
-  portfolio: any
+  portfolio: PortfolioSummary | null
 }
 
 export default function NextSteps({ portfolio }: NextStepsProps) {

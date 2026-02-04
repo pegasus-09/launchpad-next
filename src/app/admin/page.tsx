@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
-import { Users, GraduationCap, BookOpen, ClipboardCheck, Plus } from 'lucide-react'
+import { Users, GraduationCap, BookOpen, ClipboardCheck } from 'lucide-react'
 import LogoutButton from '@/components/auth/LogoutButton'
 
 interface Stats {
@@ -29,9 +29,13 @@ export default function AdminDashboard() {
       setLoading(true)
       const response = await adminApi.getSchoolStats()
       setStats(response)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load stats:', err)
-      setError(err.message)
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Failed to load stats')
+      }
     } finally {
       setLoading(false)
     }
@@ -57,13 +61,15 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
-            Admin Dashboard
-          </h1>
-          <p className="text-gray-600 mt-1">Manage your school's career guidance system</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-600 mt-1">Manage your school&apos;s career guidance system</p>
+          </div>
+          <LogoutButton variant="light" />
         </div>
-        <LogoutButton variant='light' />
       </div>
 
       {/* Content */}
@@ -71,7 +77,7 @@ export default function AdminDashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Students */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-violet-100 hover:shadow-xl transition-all">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-violet-100">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-violet-500 to-violet-600 rounded-lg">
                 <Users className="w-6 h-6 text-white" />
@@ -82,7 +88,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Teachers */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-teal-100 hover:shadow-xl transition-all">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-teal-100">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-teal-500 to-teal-600 rounded-lg">
                 <GraduationCap className="w-6 h-6 text-white" />
@@ -93,7 +99,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Subjects */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-purple-100 hover:shadow-xl transition-all">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-purple-100">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-purple-500 to-purple-600 rounded-lg">
                 <BookOpen className="w-6 h-6 text-white" />
@@ -104,7 +110,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Assessments */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-orange-100 hover:shadow-xl transition-all">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-orange-100">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-orange-500 to-orange-600 rounded-lg">
                 <ClipboardCheck className="w-6 h-6 text-white" />

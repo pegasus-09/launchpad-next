@@ -189,7 +189,7 @@ export default function ProjectsSection({ projects, onChange }: Props) {
                 </h2>
                 <p className="text-sm text-gray-600">
                     Add 1 or more projects that showcase your abilities and interests. Include personal projects, 
-                    coursework, competitions, or anything you've built.
+                    coursework, competitions, or anything you&apos;ve built.
                 </p>
             </div>
 

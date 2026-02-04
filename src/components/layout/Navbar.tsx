@@ -4,21 +4,40 @@ import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
+import type { User } from "@supabase/supabase-js"
 
 export default function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+
+  function isAbortError(error: unknown): boolean {
+    return (
+      typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      (error as { name?: string }).name === "AbortError"
+    )
+  }
 
   useEffect(() => {
     const supabase = createClient()
     
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setUser(session?.user ?? null)
+        setLoading(false)
+      })
+      .catch((err) => {
+        if (!isAbortError(err)) {
+          console.error("Failed to get session:", err)
+        }
+        setUser(null)
+        setLoading(false)
+      })
 
     // Listen for auth changes
     const {
@@ -90,11 +109,11 @@ export default function Navbar() {
                 </>
               ) : (
                 <Link
-                href="/login"
-                className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium hover:bg-violet-700 transition-colors"
-              >
-                Log in
-              </Link>
+                  href="/login"
+                  className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium hover:bg-violet-700 transition-colors"
+                >
+                  Log in
+                </Link>
               )}
             </div>
           )}

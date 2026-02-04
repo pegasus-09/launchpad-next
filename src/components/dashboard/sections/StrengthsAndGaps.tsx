@@ -1,8 +1,19 @@
 import Link from "next/link"
 import { normaliseRankingScore } from "@/lib/normalise"
 
+interface SuggestionItem {
+  title?: string
+  signal?: string
+  score?: number
+}
+
+interface AssessmentSuggestions {
+  strengths?: SuggestionItem[]
+  gaps?: SuggestionItem[]
+}
+
 interface StrengthsAndGapsProps {
-  assessmentSuggestions: any
+  assessmentSuggestions: AssessmentSuggestions | null
 }
 
 function formatTitle(text: string): string {
@@ -26,10 +37,10 @@ export default function StrengthsAndGaps({ assessmentSuggestions }: StrengthsAnd
         <h3 className="mb-3 font-semibold">Top strengths</h3>
         {topStrengths.length > 0 ? (
           <ul className="space-y-2 text-sm">
-            {topStrengths.map((strength: any, idx: number) => (
+            {topStrengths.map((strength, idx) => (
               <li key={idx}>
                 {strength.score != null ? `${normaliseRankingScore(strength.score)}% - ` : '- '}
-                {formatTitle(strength.title || strength.signal)}
+                {formatTitle(strength.title || strength.signal || "Unknown")}
               </li>
             ))}
           </ul>
@@ -47,10 +58,10 @@ export default function StrengthsAndGaps({ assessmentSuggestions }: StrengthsAnd
         <h3 className="mb-3 font-semibold">Areas to develop</h3>
         {topGaps.length > 0 ? (
           <ul className="space-y-2 text-sm">
-            {topGaps.map((gap: any, idx: number) => (
+            {topGaps.map((gap, idx) => (
               <li key={idx} className="text-gray-700">
                 {gap.score != null ? `${normaliseRankingScore(gap.score)}% - ` : '- '}
-                {formatTitle(gap.title || gap.signal)}
+                {formatTitle(gap.title || gap.signal || "Unknown")}
               </li>
             ))}
           </ul>

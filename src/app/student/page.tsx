@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { authApi, studentApi } from "@/lib/api"
 import { requireRole } from "@/lib/auth/roleCheck"
 import { normaliseRankingScore } from "@/lib/normalise"
-import { createClient } from "@/lib/supabase/client"
 
 // Phosphor-style SVG icons
 const FolderIcon = () => (
@@ -50,8 +49,20 @@ interface ProfileData {
     updated_at?: string
     raw_answers?: Record<string, number>
   }
-  work_experiences?: Array<any>
-  projects?: Array<any>
+  work_experiences?: WorkExperience[]
+  projects?: Project[]
+}
+
+interface Project {
+  id: string
+  title: string
+  description?: string
+}
+
+interface WorkExperience {
+  id: string
+  title: string
+  organisation: string
 }
 
 export default function StudentDashboard() {
@@ -78,9 +89,13 @@ export default function StudentDashboard() {
         }
 
         setProfileData(data)
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Dashboard error:', err)
-        setError(err.message || 'Failed to load dashboard')
+        if (err instanceof Error) {
+          setError(err.message || 'Failed to load dashboard')
+        } else {
+          setError('Failed to load dashboard')
+        }
       } finally {
         setLoading(false)
       }
@@ -256,7 +271,7 @@ export default function StudentDashboard() {
           </p>
         ) : (
           <div className="space-y-3">
-            {projects.slice(0, 3).map((project: any) => (
+            {projects.slice(0, 3).map((project) => (
               <div key={project.id} className="flex items-start gap-3 p-4 border border-gray-100 rounded-xl">
                 <BriefcaseIcon />
                 <div>
@@ -266,7 +281,7 @@ export default function StudentDashboard() {
               </div>
             ))}
 
-            {workExperiences.slice(0, 3).map((exp: any) => (
+            {workExperiences.slice(0, 3).map((exp) => (
               <div key={exp.id} className="flex items-start gap-3 p-4 border border-gray-100 rounded-xl">
                 <BuildingIcon />
                 <div>

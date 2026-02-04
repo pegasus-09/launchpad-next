@@ -27,11 +27,15 @@ export default function ManageSubjectsPage() {
     async function loadData() {
       try {
         await requireRole('admin')
-        const data = await adminApi.getAllSubjects()
+        const data = (await adminApi.getAllSubjects()) as { subjects?: Subject[] }
         setSubjects(data.subjects || [])
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.log('Subjects API not available yet')
-        // API might not exist yet - show empty state
+        if (err instanceof Error) {
+          setError(err.message)
+        } else {
+          setError('Failed to load subjects')
+        }
         setSubjects([])
       } finally {
         setLoading(false)
@@ -166,7 +170,7 @@ export default function ManageSubjectsPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filteredSubjects.map((subject) => (
-                    <tr key={subject.id} className="hover:bg-gray-50">
+                    <tr key={subject.id}>
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">{subject.name}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{subject.code}</td>
                       <td className="px-4 py-3 text-sm">

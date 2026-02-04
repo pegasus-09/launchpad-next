@@ -87,9 +87,13 @@ export default function AssessmentPage() {
     try {
       await studentApi.submitAssessment(answers)
       router.push('/student')
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Assessment submission error:', err)
-      setError(err.message || 'Failed to submit assessment')
+      if (err instanceof Error) {
+        setError(err.message || 'Failed to submit assessment')
+      } else {
+        setError('Failed to submit assessment')
+      }
       setIsSubmitting(false)
     }
   }

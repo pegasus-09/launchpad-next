@@ -3,22 +3,17 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
-import { Plus, Search, UserPlus } from 'lucide-react'
+import { Search, UserPlus } from 'lucide-react'
+
+type ClassRef = string | { id?: string; class_name?: string }
+type SubjectRef = string | { id?: string; name?: string }
 
 interface Teacher {
   id: string
   full_name: string
   email: string
-  classes_taught: Array<{
-    id: string
-    class_name: string
-    year_level: string
-  }>
-  subjects_taught: Array<{
-    id: string
-    name: string
-    category: string
-  }>
+  classes_taught: ClassRef[]
+  subjects_taught: SubjectRef[]
   classes_count: number
   subjects_count: number
 }
@@ -45,10 +40,14 @@ export default function TeachersPage() {
   async function loadTeachers() {
     try {
       setLoading(true)
-      const response = await adminApi.getAllTeachers()
+      const response = (await adminApi.getAllTeachers()) as { teachers: Teacher[] }
       setTeachers(response.teachers)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Failed to load teachers')
+      }
     } finally {
       setLoading(false)
     }
@@ -65,8 +64,9 @@ export default function TeachersPage() {
       await loadTeachers()
       setShowAddModal(false)
       setNewTeacher({ full_name: '', email: '', password: '' })
-    } catch (err: any) {
-      alert('Failed to add teacher: ' + err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      alert('Failed to add teacher: ' + message)
     }
   }
 
@@ -170,11 +170,11 @@ export default function TeachersPage() {
                     <div className="mb-3">
                       <div className="text-xs text-gray-600 mb-2">Classes:</div>
                       <div className="flex flex-wrap gap-1">
-                        {teacher.classes_taught.slice(0, 3).map((cls: any, idx: number) => {
+                        {teacher.classes_taught.slice(0, 3).map((cls: ClassRef, idx: number) => {
                           const className = typeof cls === 'string' ? cls : (cls?.class_name || 'Unnamed Class')
                           return (
                             <span
-                              key={cls?.id || `class-${idx}`}
+                              key={typeof cls === 'string' ? `class-${idx}` : (cls?.id || `class-${idx}`)}
                               className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
                             >
                               {className}
@@ -195,11 +195,11 @@ export default function TeachersPage() {
                     <div>
                       <div className="text-xs text-gray-600 mb-2">Subjects:</div>
                       <div className="flex flex-wrap gap-1">
-                        {teacher.subjects_taught.slice(0, 3).map((subject: any, idx: number) => {
+                        {teacher.subjects_taught.slice(0, 3).map((subject: SubjectRef, idx: number) => {
                           const subjectName = typeof subject === 'string' ? subject : (subject?.name || 'Unnamed Subject')
                           return (
                             <span
-                              key={subject?.id || `subject-${idx}`}
+                              key={typeof subject === 'string' ? `subject-${idx}` : (subject?.id || `subject-${idx}`)}
                               className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"
                             >
                               {subjectName}

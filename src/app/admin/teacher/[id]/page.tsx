@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
 import { ArrowLeft, Edit2, Trash2, Save, X, Plus } from 'lucide-react'
@@ -30,6 +30,7 @@ interface Student {
   full_name: string
   email: string
   year_level: string
+  class_name?: string
 }
 
 interface TeacherData {
@@ -58,33 +59,38 @@ export default function TeacherDetailPage() {
   const [showClassModal, setShowClassModal] = useState(false)
 
   // Load teacher data
-  useEffect(() => {
-    loadTeacherData()
-  }, [teacherId])
-
-  async function loadTeacherData() {
+  const loadTeacherData = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await adminApi.getTeacherProfile(teacherId)
+      const response = (await adminApi.getTeacherProfile(teacherId)) as TeacherData
       setData(response)
       setEditForm({
         full_name: response.teacher.full_name,
         email: response.teacher.email
       })
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Failed to load teacher')
+      }
     } finally {
       setLoading(false)
     }
-  }
+  }, [teacherId])
+
+  useEffect(() => {
+    loadTeacherData()
+  }, [loadTeacherData])
 
   async function handleUpdate() {
     try {
       await adminApi.updateTeacher(teacherId, editForm)
       await loadTeacherData()
       setIsEditing(false)
-    } catch (err: any) {
-      alert('Failed to update teacher: ' + err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      alert('Failed to update teacher: ' + message)
     }
   }
 
@@ -92,8 +98,9 @@ export default function TeacherDetailPage() {
     try {
       await adminApi.deleteTeacher(teacherId)
       router.push('/admin/teachers')
-    } catch (err: any) {
-      alert('Failed to delete teacher: ' + err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      alert('Failed to delete teacher: ' + message)
     }
   }
 
@@ -139,17 +146,19 @@ export default function TeacherDetailPage() {
                 <>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-violet-600 to-teal-600 text-white rounded-lg hover:shadow-lg transition-all"
+                    className="flex items-center justify-center p-2 bg-linear-to-r from-violet-600 to-teal-600 text-white rounded-lg hover:shadow-lg transition-all"
+                    aria-label="Edit teacher"
+                    title="Edit teacher"
                   >
                     <Edit2 className="w-4 h-4" />
-                    Edit
                   </button>
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    className="flex items-center justify-center p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    aria-label="Delete teacher"
+                    title="Delete teacher"
                   >
                     <Trash2 className="w-4 h-4" />
-                    Delete
                   </button>
                 </>
               ) : (
@@ -294,7 +303,7 @@ export default function TeacherDetailPage() {
                     return (
                       <div
                         key={cls.id}
-                        className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
+                        className="p-4 border border-gray-200 rounded-lg"
                       >
                         <div className="flex items-start justify-between">
                           <div>
@@ -334,7 +343,7 @@ export default function TeacherDetailPage() {
                           <p className="text-sm text-gray-600">{student.email}</p>
                         </div>
                         <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
-                          Year {student.year_level}
+                          Class {student.class_name || student.year_level}
                         </span>
                       </div>
                     </div>

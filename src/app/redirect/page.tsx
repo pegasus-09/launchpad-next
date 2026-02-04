@@ -1,44 +1,72 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { getCurrentUserProfile } from "@/lib/auth/roleCheck"
 
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    (error as { name?: string }).name === 'AbortError'
+  )
+}
+
 export default function DashboardRouter() {
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
-
   useEffect(() => {
+    let isActive = true
+
     async function redirectToRoleDashboard() {
       try {
         const profile = await getCurrentUserProfile()
         
         if (!profile) {
-          router.push('/login')
+          if (isActive) {
+            router.push('/login')
+          }
           return
         }
         
         // Redirect based on role
         switch (profile.role) {
           case 'admin':
-            router.push('/admin/')
+            if (isActive) {
+              router.push('/admin/')
+            }
             break
           case 'teacher':
-            router.push('/teacher/')
+            if (isActive) {
+              router.push('/teacher/')
+            }
             break
           case 'student':
-            router.push('/student/')
+            if (isActive) {
+              router.push('/student/')
+            }
             break
           default:
-            router.push('/login')
+            if (isActive) {
+              router.push('/login')
+            }
         }
       } catch (error) {
+        if (isAbortError(error)) {
+          return
+        }
         console.error('Dashboard redirect error:', error)
-        router.push('/login')
+        if (isActive) {
+          router.push('/login')
+        }
       }
     }
 
     redirectToRoleDashboard()
+
+    return () => {
+      isActive = false
+    }
   }, [router])
 
   return (

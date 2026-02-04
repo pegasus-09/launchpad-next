@@ -16,6 +16,7 @@ interface Student {
   full_name: string
   email: string
   year_level: string
+  class_name?: string
   top_career: TopCareer | null
   has_assessment: boolean
 }
@@ -49,12 +50,15 @@ export default function ReportsPage() {
   async function loadReports() {
     try {
       setLoading(true)
-      const response = await adminApi.getReportsSummary()
-      console.log('Reports API Response:', response)
+      const response = (await adminApi.getReportsSummary()) as ReportsData
       setData(response)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Reports error:', err)
-      setError(err.message)
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Failed to load reports')
+      }
     } finally {
       setLoading(false)
     }
@@ -155,7 +159,9 @@ export default function ReportsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900">{student.full_name}</h3>
-                      <p className="text-sm text-gray-600">{student.email} • Year {student.year_level}</p>
+                      <p className="text-sm text-gray-600">
+                        {student.email} • Class {student.class_name || student.year_level}
+                      </p>
                     </div>
                     {student.top_career && (
                       <div className="text-right">
@@ -181,7 +187,7 @@ export default function ReportsPage() {
           ) : (
             <div className="space-y-3">
               {data.classes.map((cls) => (
-                <div key={cls.id} className="p-4 border border-teal-100 rounded-lg hover:border-teal-300 transition-colors">
+                <div key={cls.id} className="p-4 border border-teal-100 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium text-gray-900">{cls.class_name}</h3>
@@ -210,7 +216,7 @@ export default function ReportsPage() {
               {studentsWithoutAssessments.map((student) => (
                 <div key={student.id} className="p-3 bg-white rounded-lg border border-orange-200">
                   <p className="font-medium text-gray-900">{student.full_name}</p>
-                  <p className="text-sm text-gray-600">Year {student.year_level}</p>
+                  <p className="text-sm text-gray-600">Class {student.class_name || student.year_level}</p>
                 </div>
               ))}
             </div>

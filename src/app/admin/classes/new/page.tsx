@@ -42,14 +42,18 @@ export default function CreateClassPage() {
   async function loadData() {
     try {
       setLoading(true)
-      const [subjectsRes, teachersRes] = await Promise.all([
+      const [subjectsRes, teachersRes] = (await Promise.all([
         adminApi.getAllSubjects(),
         adminApi.getAllTeachers()
-      ])
-      setSubjects(subjectsRes.subjects)
-      setTeachers(teachersRes.teachers)
-    } catch (err: any) {
-      setError(err.message)
+      ])) as [{ subjects: Subject[] }, { teachers: Teacher[] }]
+      setSubjects(subjectsRes.subjects || [])
+      setTeachers(teachersRes.teachers || [])
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Failed to load classes data')
+      }
     } finally {
       setLoading(false)
     }
@@ -67,8 +71,9 @@ export default function CreateClassPage() {
       setSubmitting(true)
       await adminApi.createClass(formData)
       router.push('/admin/classes')
-    } catch (err: any) {
-      alert('Failed to create class: ' + err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      alert('Failed to create class: ' + message)
     } finally {
       setSubmitting(false)
     }

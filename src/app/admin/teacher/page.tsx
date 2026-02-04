@@ -3,22 +3,17 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
-import { ArrowLeft, Search, UserPlus } from 'lucide-react'
+import { ArrowLeft, Search, UserPlus, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+
+type ClassRef = string | { id?: string; class_name?: string }
+type SubjectRef = string | { id?: string; name?: string }
 
 interface Teacher {
   id: string
   full_name: string
   email: string
-  classes_taught: Array<{
-    id: string
-    class_name: string
-    year_level: string
-  }>
-  subjects_taught: Array<{
-    id: string
-    name: string
-    category: string
-  }>
+  classes_taught: ClassRef[]
+  subjects_taught: SubjectRef[]
   classes_count: number
   subjects_count: number
 }
@@ -31,6 +26,7 @@ export default function TeachersPage() {
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null)
   
   const [newTeacher, setNewTeacher] = useState({
     full_name: '',
@@ -45,10 +41,14 @@ export default function TeachersPage() {
   async function loadTeachers() {
     try {
       setLoading(true)
-      const response = await adminApi.getAllTeachers()
+      const response = (await adminApi.getAllTeachers()) as { teachers: Teacher[] }
       setTeachers(response.teachers)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Failed to load teachers')
+      }
     } finally {
       setLoading(false)
     }
@@ -65,8 +65,9 @@ export default function TeachersPage() {
       await loadTeachers()
       setShowAddModal(false)
       setNewTeacher({ full_name: '', email: '', password: '' })
-    } catch (err: any) {
-      alert('Failed to add teacher: ' + err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      alert('Failed to add teacher: ' + message)
     }
   }
 
@@ -74,6 +75,20 @@ export default function TeachersPage() {
     teacher.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     teacher.email.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  async function handleDeleteTeacher(teacherId: string) {
+    if (!confirm('Delete this teacher? This will also remove them from assigned classes.')) {
+      return
+    }
+
+    try {
+      await adminApi.deleteTeacher(teacherId)
+      setTeachers(prev => prev.filter(t => t.id !== teacherId))
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      alert('Failed to delete teacher: ' + message)
+    }
+  }
 
   if (loading) {
     return (
@@ -152,10 +167,50 @@ export default function TeachersPage() {
                 className="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer overflow-hidden border border-violet-100 hover:border-violet-300"
               >
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                    {teacher.full_name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">{teacher.email}</p>
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                        {teacher.full_name}
+                      </h3>
+                      <p className="text-sm text-gray-600">{teacher.email}</p>
+                    </div>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          setActiveMenuId(activeMenuId === teacher.id ? null : teacher.id)
+                        }}
+                        className="p-1.5 rounded-md hover:bg-violet-50 text-gray-500 hover:text-violet-600 transition-colors"
+                        aria-label="Open teacher actions"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                      {activeMenuId === teacher.id && (
+                        <div
+                          className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => router.push(`/admin/teacher/${teacher.id}`)}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-violet-50"
+                          >
+                            <Pencil className="w-4 h-4 text-violet-600" />
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTeacher(teacher.id)}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
                   {/* Stats */}
                   <div className="flex gap-4 mb-4">
@@ -178,11 +233,11 @@ export default function TeachersPage() {
                     <div className="mb-3">
                       <div className="text-xs text-gray-600 mb-2">Classes:</div>
                       <div className="flex flex-wrap gap-1">
-                        {teacher.classes_taught.slice(0, 3).map((cls: any, idx: number) => {
+                        {teacher.classes_taught.slice(0, 3).map((cls: ClassRef, idx: number) => {
                           const className = typeof cls === 'string' ? cls : (cls?.class_name || 'Unnamed Class')
                           return (
                             <span
-                              key={cls?.id || `class-${idx}`}
+                              key={typeof cls === 'string' ? `class-${idx}` : (cls?.id || `class-${idx}`)}
                               className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-violet-100 text-violet-800"
                             >
                               {className}
@@ -203,11 +258,11 @@ export default function TeachersPage() {
                     <div>
                       <div className="text-xs text-gray-600 mb-2">Subjects:</div>
                       <div className="flex flex-wrap gap-1">
-                        {teacher.subjects_taught.slice(0, 3).map((subject: any, idx: number) => {
+                        {teacher.subjects_taught.slice(0, 3).map((subject: SubjectRef, idx: number) => {
                           const subjectName = typeof subject === 'string' ? subject : (subject?.name || 'Unnamed Subject')
                           return (
                             <span
-                              key={subject?.id || `subject-${idx}`}
+                              key={typeof subject === 'string' ? `subject-${idx}` : (subject?.id || `subject-${idx}`)}
                               className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-teal-100 text-teal-800"
                             >
                               {subjectName}
