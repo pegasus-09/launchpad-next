@@ -225,6 +225,7 @@ export const adminApi = {
     full_name?: string
     year_level?: string
     class_id?: string | null
+    class_ids?: string[]
   }) {
     const response = await authenticatedFetch(`/admin/student/${studentId}`, {
       method: 'PUT',
@@ -398,10 +399,12 @@ export const adminApi = {
    * Create new class
    */
   async createClass(data: {
-    subject_id: string
+    subject_id?: string
+    subject_name?: string
     teacher_id: string
     year_level: string
     class_name: string
+    student_ids?: string[]
   }) {
     const response = await authenticatedFetch('/admin/class', {
       method: 'POST',
@@ -411,6 +414,46 @@ export const adminApi = {
     if (!response.ok) {
       const error = await response.text()
       throw new Error(`Failed to create class: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Update class
+   */
+  async updateClass(classId: string, data: {
+    subject_id?: string
+    subject_name?: string
+    teacher_id?: string
+    year_level?: string
+    class_name?: string
+    student_ids?: string[]
+  }) {
+    const response = await authenticatedFetch(`/admin/class/${classId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to update class: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Delete class
+   */
+  async deleteClass(classId: string) {
+    const response = await authenticatedFetch(`/admin/class/${classId}`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to delete class: ${error}`)
     }
 
     return response.json()

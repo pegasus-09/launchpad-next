@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
-import { ArrowLeft, Search, CheckCircle, XCircle, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, Search, CheckCircle, XCircle, Clock, MoreVertical, Pencil, Trash2, UserPlus } from 'lucide-react'
 
 interface Student {
   id: string
@@ -12,7 +12,10 @@ interface Student {
   year_level: string
   class_name?: string
   class_id?: string
+  class_names?: string[]
+  class_ids?: string[]
   has_assessment: boolean
+  has_teacher_comment?: boolean
   subjects_count?: number
 }
 
@@ -28,6 +31,20 @@ export default function StudentsPage() {
   useEffect(() => {
     loadStudents()
   }, [])
+
+  useEffect(() => {
+    if (!activeMenuId) return
+
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Element | null
+      if (!target) return
+      if (target.closest('[data-student-menu]')) return
+      setActiveMenuId(null)
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [activeMenuId])
 
   async function loadStudents() {
     try {
@@ -49,6 +66,33 @@ export default function StudentsPage() {
     student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     student.email.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  function getAssessmentStatus(student: Student) {
+    if (!student.has_assessment) {
+      return {
+        label: 'Assessment not submitted',
+        icon: XCircle,
+        iconClass: 'text-rose-700',
+        bgClass: 'bg-gray-100'
+      }
+    }
+
+    if (student.has_teacher_comment) {
+      return {
+        label: 'Report available',
+        icon: CheckCircle,
+        iconClass: 'text-emerald-600',
+        bgClass: 'bg-emerald-50'
+      }
+    }
+
+    return {
+      label: 'Pending teacher comment', 
+      icon: Clock,
+      iconClass: 'text-amber-500',
+      bgClass: 'bg-amber-50'
+    }
+  }
 
   async function handleDeleteStudent(studentId: string) {
     if (!confirm('Delete this student? This action cannot be undone.')) {
@@ -75,7 +119,7 @@ export default function StudentsPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50 flex items-center justify-center">
-        <div className="text-red-600">Error: {error}</div>
+        <div className="text-rose-700">Error: {error}</div>
       </div>
     )
   }
@@ -85,21 +129,30 @@ export default function StudentsPage() {
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-4 mb-4">
-            <button
-              onClick={() => router.push('/admin')}
-              className="p-2 hover:bg-violet-50 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-violet-600" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
-                Students
-              </h1>
-              <p className="text-gray-600 mt-1">
-                {students.length} student{students.length !== 1 ? 's' : ''} in your school
-              </p>
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.push('/admin')}
+                className="p-2 hover:bg-violet-50 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-violet-600" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
+                  Students
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  {students.length} student{students.length !== 1 ? 's' : ''} in your school
+                </p>
+              </div>
             </div>
+            <button
+              onClick={() => router.push('/admin/add-student')}
+              className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
+            >
+              <UserPlus className="w-4 h-4" />
+              Add Student
+            </button>
           </div>
         </div>
       </div>
@@ -136,18 +189,34 @@ export default function StudentsPage() {
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-3 gap-3">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      <h3 className="text-lg font-semibold text-emerald-800 mb-1">
                         {student.full_name}
                       </h3>
                       <p className="text-sm text-gray-600">{student.email}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      {student.has_assessment ? (
-                        <CheckCircle className="w-5 h-5 text-teal-500" />
-                      ) : (
-                        <XCircle className="w-5 h-5 text-gray-300" />
-                      )}
-                      <div className="relative">
+                      {(() => {
+                        const status = getAssessmentStatus(student)
+                        const StatusIcon = status.icon
+                        // TODO: Fix title formatting so its not cut off
+                        return (
+                          <div className="relative group">
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center ${status.bgClass}`}
+                              aria-label={status.label}
+                            >
+                              <StatusIcon className={`w-5 h-5 ${status.iconClass}`} />
+                            </div>
+                            <div className="pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 opacity-0 transition-opacity group-hover:opacity-100">
+                              <span className="whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-lg">
+                                {status.label}
+                              </span>
+                              <span className="absolute left-1/2 -top-2 -translate-x-1/2 border-4 border-transparent border-b-slate-900" />
+                            </div>
+                          </div>
+                        )
+                      })()}
+                      <div className="relative" data-student-menu>
                         <button
                           type="button"
                           onClick={(event) => {
@@ -167,15 +236,15 @@ export default function StudentsPage() {
                             <button
                               type="button"
                               onClick={() => router.push(`/admin/student/${student.id}/edit`)}
-                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-violet-50"
+                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-black bg-white hover:bg-gray-100 transition-colors"
                             >
-                              <Pencil className="w-4 h-4 text-violet-600" />
+                              <Pencil className="w-4 h-4" />
                               Edit
                             </button>
                             <button
                               type="button"
                               onClick={() => handleDeleteStudent(student.id)}
-                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-700 hover:bg-rose-700/10 transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
                               Delete
@@ -186,13 +255,22 @@ export default function StudentsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 pt-3 border-t border-gray-100">
-                    <span className="px-3 py-1 bg-violet-100 text-violet-700 text-sm rounded-full font-medium">
-                      Class {student.class_name || student.year_level}
+                  <div className="flex items-center gap-2 flex-wrap pt-3 border-t border-gray-100">
+                    <span className="px-3 py-1 bg-teal-50 text-teal-700 text-sm rounded-full font-medium">
+                      Year {student.year_level || '—'}
                     </span>
-                    {student.has_assessment && (
-                      <span className="text-xs text-teal-600 font-medium">
-                        Report Complete
+                    {Array.isArray(student.class_names) && student.class_names.length > 0 ? (
+                      student.class_names.map((name, idx) => (
+                        <span
+                          key={`${student.id}-class-${idx}`}
+                          className="px-3 py-1 bg-violet-100 text-violet-700 text-sm rounded-full font-medium"
+                        >
+                          {name}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full font-medium">
+                        Unassigned
                       </span>
                     )}
                   </div>

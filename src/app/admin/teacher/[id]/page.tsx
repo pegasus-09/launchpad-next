@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
 import { ArrowLeft, Edit2, Trash2, Save, X, Plus } from 'lucide-react'
@@ -31,6 +31,8 @@ interface Student {
   email: string
   year_level: string
   class_name?: string
+  class_names?: string[]
+  class_ids?: string[]
 }
 
 interface TeacherData {
@@ -57,6 +59,7 @@ export default function TeacherDetailPage() {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showClassModal, setShowClassModal] = useState(false)
+  const [activeClassId, setActiveClassId] = useState<string>('all')
 
   // Load teacher data
   const loadTeacherData = useCallback(async () => {
@@ -82,6 +85,21 @@ export default function TeacherDetailPage() {
   useEffect(() => {
     loadTeacherData()
   }, [loadTeacherData])
+
+  useEffect(() => {
+    if (data?.classes?.length && activeClassId === 'all') {
+      return
+    }
+    if (!data?.classes?.length) {
+      setActiveClassId('all')
+    }
+  }, [data, activeClassId])
+
+  const studentsByClass = useMemo(() => {
+    if (!data) return []
+    if (activeClassId === 'all') return data.students
+    return data.students.filter((student) => student.class_ids?.includes(activeClassId))
+  }, [data, activeClassId])
 
   async function handleUpdate() {
     try {
@@ -115,7 +133,7 @@ export default function TeacherDetailPage() {
   if (error || !data) {
     return (
       <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50 flex items-center justify-center">
-        <div className="text-red-600">Error: {error || 'Teacher not found'}</div>
+        <div className="text-rose-700">Error: {error || 'Teacher not found'}</div>
       </div>
     )
   }
@@ -134,7 +152,7 @@ export default function TeacherDetailPage() {
                 <ArrowLeft className="w-5 h-5 text-violet-600" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold text-emerald-800">
                   {data.teacher.full_name}
                 </h1>
                 <p className="text-gray-600">{data.teacher.email}</p>
@@ -146,7 +164,7 @@ export default function TeacherDetailPage() {
                 <>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="flex items-center justify-center p-2 bg-linear-to-r from-violet-600 to-teal-600 text-white rounded-lg hover:shadow-lg transition-all"
+                    className="flex items-center justify-center p-2 bg-white text-black border border-black rounded-lg hover:bg-black hover:text-white transition-colors"
                     aria-label="Edit teacher"
                     title="Edit teacher"
                   >
@@ -154,7 +172,7 @@ export default function TeacherDetailPage() {
                   </button>
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="flex items-center justify-center p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    className="flex items-center justify-center p-2 bg-rose-700 text-white rounded-lg hover:bg-rose-800 transition-colors"
                     aria-label="Delete teacher"
                     title="Delete teacher"
                   >
@@ -287,7 +305,7 @@ export default function TeacherDetailPage() {
                 <h2 className="text-lg font-semibold">Classes</h2>
                 <button
                   onClick={() => setShowClassModal(true)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-black text-white text-sm rounded-lg hover:bg-gray-900 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   Add Class
@@ -325,13 +343,42 @@ export default function TeacherDetailPage() {
 
             {/* Students */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold mb-4">Students</h2>
+              <div className="flex flex-col gap-3 mb-4">
+                <h2 className="text-lg font-semibold">Students</h2>
+                {data.classes.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setActiveClassId('all')}
+                      className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
+                        activeClassId === 'all'
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                      }`}
+                    >
+                      All
+                    </button>
+                    {data.classes.map((cls) => (
+                      <button
+                        key={cls.id}
+                        onClick={() => setActiveClassId(cls.id)}
+                        className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
+                          activeClassId === cls.id
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                        }`}
+                      >
+                        {cls.class_name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               
-              {data.students.length === 0 ? (
+              {studentsByClass.length === 0 ? (
                 <p className="text-gray-500">No students in classes</p>
               ) : (
                 <div className="space-y-2">
-                  {data.students.map((student) => (
+                  {studentsByClass.map((student) => (
                     <div
                       key={student.id}
                       className="p-3 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
@@ -339,12 +386,25 @@ export default function TeacherDetailPage() {
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-medium text-gray-900">{student.full_name}</h3>
+                          <h3 className="font-medium text-emerald-800">{student.full_name}</h3>
                           <p className="text-sm text-gray-600">{student.email}</p>
                         </div>
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
-                          Class {student.class_name || student.year_level}
-                        </span>
+                        <div className="flex flex-wrap gap-1 justify-end">
+                          {Array.isArray(student.class_names) && student.class_names.length > 0 ? (
+                            student.class_names.map((name, idx) => (
+                              <span
+                                key={`${student.id}-class-${idx}`}
+                                className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
+                              >
+                                {name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                              Unassigned
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -372,7 +432,7 @@ export default function TeacherDetailPage() {
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="px-4 py-2 bg-rose-700 text-white rounded-lg hover:bg-rose-800 transition-colors"
               >
                 Delete
               </button>
@@ -397,7 +457,7 @@ export default function TeacherDetailPage() {
                 Cancel
               </button>
               <button
-                onClick={() => router.push('/admin/classes/new')}
+                onClick={() => router.push('/admin/classes')}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Go to Classes

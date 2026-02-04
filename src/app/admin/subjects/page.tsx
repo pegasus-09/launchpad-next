@@ -59,12 +59,12 @@ export default function ManageSubjectsPage() {
     return (
       <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
         <div className="max-w-4xl mx-auto p-6">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-red-900 mb-2">Error</h2>
-            <p className="text-red-800">{error}</p>
+          <div className="bg-rose-700/10 border border-rose-700/30 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-rose-700 mb-2">Error</h2>
+            <p className="text-rose-700">{error}</p>
             <button
               onClick={() => router.push('/admin/')}
-              className="cursor-pointer mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              className="cursor-pointer mt-4 px-4 py-2 bg-rose-700 text-white rounded-lg hover:bg-rose-800"
             >
               Back to Dashboard
             </button>
@@ -192,7 +192,7 @@ export default function ManageSubjectsPage() {
                           <button className="text-violet-600 hover:text-violet-700 font-medium hover:underline cursor-pointer">
                             Edit
                           </button>
-                          <button className="text-red-600 hover:text-red-700 font-medium hover:underline cursor-pointer">
+                          <button className="text-rose-700 hover:text-rose-800 font-medium hover:underline cursor-pointer">
                             Delete
                           </button>
                         </div>

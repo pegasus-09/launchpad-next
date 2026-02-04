@@ -75,7 +75,7 @@ export default function ReportsPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50 flex items-center justify-center">
-        <div className="text-red-600">Error: {error}</div>
+        <div className="text-rose-700">Error: {error}</div>
       </div>
     )
   }

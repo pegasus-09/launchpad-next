@@ -113,8 +113,8 @@ export default function AddStudentPage() {
           <p className="text-gray-600 mb-8">Create a new student account</p>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-800 text-sm">{error}</p>
+            <div className="mb-6 p-4 bg-rose-700/10 border border-rose-700/30 rounded-lg">
+              <p className="text-rose-700 text-sm">{error}</p>
             </div>
           )}
 

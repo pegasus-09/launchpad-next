@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { adminApi } from "@/lib/api"
 import { requireRole } from "@/lib/auth/roleCheck"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Search } from "lucide-react"
 
 interface ClassOption {
   id: string
@@ -18,8 +18,9 @@ interface StudentProfile {
   full_name: string
   email: string
   year_level: string
+  class_ids?: string[]
+  class_names?: string[]
   class_id?: string | null
-  class_name?: string
 }
 
 interface StudentProfileResponse {
@@ -40,11 +41,13 @@ export default function EditStudentPage() {
   const [error, setError] = useState<string | null>(null)
   const [classes, setClasses] = useState<ClassOption[]>([])
   const [student, setStudent] = useState<StudentProfile | null>(null)
+  const [classSearch, setClassSearch] = useState("")
+  const [showYearWarning, setShowYearWarning] = useState(false)
 
   const [formData, setFormData] = useState({
     full_name: "",
     year_level: "",
-    class_id: ""
+    class_ids: [] as string[]
   })
 
   useEffect(() => {
@@ -62,10 +65,16 @@ export default function EditStudentPage() {
         setStudent(profile)
         setClasses(classesRes.classes || [])
 
+        const initialClassIds = Array.isArray(profile.class_ids)
+          ? profile.class_ids
+          : profile.class_id
+            ? [profile.class_id]
+            : []
+
         setFormData({
           full_name: profile.full_name || "",
           year_level: profile.year_level || "",
-          class_id: profile.class_id || ""
+          class_ids: initialClassIds
         })
       } catch (err: unknown) {
         if (err instanceof Error) {
@@ -81,6 +90,44 @@ export default function EditStudentPage() {
     loadData()
   }, [studentId])
 
+  const eligibleClasses = useMemo(() => {
+    return classes.filter((cls) => cls.year_level === formData.year_level)
+  }, [classes, formData.year_level])
+
+  const filteredClasses = useMemo(() => {
+    const query = classSearch.trim().toLowerCase()
+    if (!query) return eligibleClasses
+    return eligibleClasses.filter((cls) =>
+      cls.class_name.toLowerCase().includes(query) ||
+      (cls.subject_name || "").toLowerCase().includes(query)
+    )
+  }, [eligibleClasses, classSearch])
+
+  const allFilteredSelected = filteredClasses.length > 0 && filteredClasses.every(
+    (cls) => formData.class_ids.includes(cls.id)
+  )
+
+  function toggleClass(classId: string) {
+    setFormData((prev) => ({
+      ...prev,
+      class_ids: prev.class_ids.includes(classId)
+        ? prev.class_ids.filter((id) => id !== classId)
+        : [...prev.class_ids, classId]
+    }))
+  }
+
+  function toggleSelectAll() {
+    if (filteredClasses.length === 0) return
+    const filteredIds = filteredClasses.map((cls) => cls.id)
+    setFormData((prev) => {
+      if (allFilteredSelected) {
+        return { ...prev, class_ids: prev.class_ids.filter((id) => !filteredIds.includes(id)) }
+      }
+      const merged = new Set([...prev.class_ids, ...filteredIds])
+      return { ...prev, class_ids: Array.from(merged) }
+    })
+  }
+
   async function handleSave() {
     if (!formData.full_name || !formData.year_level) {
       alert("Please fill in name and year level.")
@@ -92,7 +139,7 @@ export default function EditStudentPage() {
       await adminApi.updateStudent(studentId, {
         full_name: formData.full_name,
         year_level: formData.year_level,
-        class_id: formData.class_id || null
+        class_ids: formData.class_ids
       })
       router.push(`/admin/student/${studentId}`)
     } catch (err: unknown) {
@@ -114,7 +161,7 @@ export default function EditStudentPage() {
   if (error || !student) {
     return (
       <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50 flex items-center justify-center">
-        <div className="text-red-600">Error: {error || "Student not found"}</div>
+        <div className="text-rose-700">Error: {error || "Student not found"}</div>
       </div>
     )
   }
@@ -153,31 +200,77 @@ export default function EditStudentPage() {
               <input
                 type="text"
                 value={formData.year_level}
-                onChange={(e) => setFormData({ ...formData, year_level: e.target.value })}
+                onChange={(e) => {
+                  if (e.target.value !== formData.year_level) {
+                    setFormData((prev) => ({ ...prev, year_level: e.target.value, class_ids: [] }))
+                    setShowYearWarning(true)
+                  } else {
+                    setFormData((prev) => ({ ...prev, year_level: e.target.value }))
+                  }
+                }}
                 className="w-full px-3 py-2 border border-violet-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
               />
+              {showYearWarning && (
+                <p className="text-xs text-rose-700 mt-1">
+                  Year level changed. Class selections were cleared to match the new year.
+                </p>
+              )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Class
-              </label>
-              <select
-                value={formData.class_id}
-                onChange={(e) => setFormData({ ...formData, class_id: e.target.value })}
-                className="w-full px-3 py-2 border border-violet-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-              >
-                <option value="">Unassigned</option>
-                {classes.map((cls) => (
-                  <option key={cls.id} value={cls.id}>
-                    {cls.class_name}
-                    {cls.subject_name ? ` • ${cls.subject_name}` : ""}
-                    {cls.year_level ? ` • Year ${cls.year_level}` : ""}
-                  </option>
-                ))}
-              </select>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Classes (Year {formData.year_level})
+                </label>
+                <button
+                  type="button"
+                  onClick={toggleSelectAll}
+                  className="text-sm font-medium text-violet-600 hover:text-violet-700"
+                >
+                  {allFilteredSelected ? 'Clear filtered' : 'Select filtered'}
+                </button>
+              </div>
+
+              <div className="relative mb-3">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search classes..."
+                  value={classSearch}
+                  onChange={(e) => setClassSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 border border-violet-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="border border-violet-100 rounded-lg max-h-60 overflow-y-auto">
+                {filteredClasses.length === 0 ? (
+                  <div className="p-4 text-sm text-gray-500">No classes available for this year.</div>
+                ) : (
+                  <ul className="divide-y divide-gray-200">
+                    {filteredClasses.map((cls) => (
+                      <li key={cls.id} className="p-3 flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={formData.class_ids.includes(cls.id)}
+                          onChange={() => toggleClass(cls.id)}
+                          className="mt-1"
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{cls.class_name}</p>
+                          <p className="text-xs text-gray-500">
+                            {cls.subject_name ? `${cls.subject_name} • ` : ''}Year {cls.year_level}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Selected {formData.class_ids.length} class{formData.class_ids.length !== 1 ? 'es' : ''}.
+              </p>
               <p className="text-xs text-gray-500 mt-1">
-                Each student should be assigned to one class.
+                Students can only be assigned to classes in the same year level.
               </p>
             </div>
           </div>

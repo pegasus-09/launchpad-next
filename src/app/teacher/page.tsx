@@ -18,6 +18,7 @@ export default function TeacherDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [students, setStudents] = useState<Student[]>([])
+  const [teacherName, setTeacherName] = useState<string | null>(null)
   const [schoolName, setSchoolName] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,6 +27,7 @@ export default function TeacherDashboard() {
       try {
         // Check authentication and role
         const userProfile = await requireRole('teacher')
+        setTeacherName(userProfile.full_name)
         
         // Load students
         const data = await teacherApi.getStudents()
@@ -66,8 +68,8 @@ export default function TeacherDashboard() {
     return (
       <div className="max-w-4xl mx-auto p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-red-900 mb-2">Error</h2>
-          <p className="text-red-800">{error}</p>
+          <h2 className="text-lg font-semibold text-rose-700 mb-2">Error</h2>
+          <p className="text-rose-700">{error}</p>
         </div>
       </div>
     )
@@ -85,6 +87,9 @@ export default function TeacherDashboard() {
             </h1>
             <p className="text-gray-600">
               {schoolName ? schoolName : 'No school assigned'}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              <span className="text-emerald-800 font-semibold">{teacherName ? teacherName : 'Teacher'}</span>
             </p>
           </div>
           <LogoutButton />
@@ -139,7 +144,7 @@ export default function TeacherDashboard() {
                 onClick={() => router.push(`/teacher/student/${student.id}`)}
               >
                 <div>
-                  <h3 className="font-semibold text-gray-900">{student.full_name}</h3>
+                  <h3 className="font-semibold text-emerald-800">{student.full_name}</h3>
                   <p className="text-sm text-gray-600">Year {student.year_level} • {student.email}</p>
                   {student.subjects && student.subjects.length > 0 && (
                     <div className="flex gap-2 mt-2">

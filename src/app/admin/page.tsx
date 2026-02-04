@@ -2,23 +2,26 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { adminApi } from '@/lib/api'
+import { adminApi, authApi } from '@/lib/api'
 import { Users, GraduationCap, BookOpen, ClipboardCheck } from 'lucide-react'
 import LogoutButton from '@/components/auth/LogoutButton'
+import { requireRole } from '@/lib/auth/roleCheck'
 
 interface Stats {
   total_students: number
   total_teachers: number
-  total_subjects: number
+  total_classes: number
   completed_assessments: number
 }
 
 export default function AdminDashboard() {
   const router = useRouter()
-  
+
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<Stats | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [adminName, setAdminName] = useState<string | null>(null)
+  const [schoolName, setSchoolName] = useState<string | null>(null)
 
   useEffect(() => {
     loadStats()
@@ -27,8 +30,12 @@ export default function AdminDashboard() {
   async function loadStats() {
     try {
       setLoading(true)
+      const userProfile = await requireRole('admin')
       const response = await adminApi.getSchoolStats()
       setStats(response)
+      setAdminName(userProfile.full_name)
+      const schoolData = await authApi.getSchool(userProfile)
+      setSchoolName(schoolData?.name ?? null)
     } catch (err: unknown) {
       console.error('Failed to load stats:', err)
       if (err instanceof Error) {
@@ -52,7 +59,7 @@ export default function AdminDashboard() {
   if (error) {
     return (
       <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50 flex items-center justify-center">
-        <div className="text-red-600">Error: {error}</div>
+        <div className="text-rose-700">Error: {error}</div>
       </div>
     )
   }
@@ -67,6 +74,10 @@ export default function AdminDashboard() {
               Admin Dashboard
             </h1>
             <p className="text-gray-600 mt-1">Manage your school&apos;s career guidance system</p>
+            <p className="text-sm text-gray-500 mt-2">
+              <span className="text-emerald-800 font-semibold">{adminName ? adminName : 'Admin'}</span>
+              {schoolName ? <span> • {schoolName}</span> : ''}
+            </p>
           </div>
           <LogoutButton variant="light" />
         </div>
@@ -98,15 +109,15 @@ export default function AdminDashboard() {
             <p className="text-sm text-gray-600 mt-1">Total Teachers</p>
           </div>
 
-          {/* Subjects */}
+          {/* Classes */}
           <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-purple-100">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-linear-to-br from-purple-500 to-purple-600 rounded-lg">
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
             </div>
-            <h3 className="text-3xl font-bold text-gray-900">{stats?.total_subjects || 0}</h3>
-            <p className="text-sm text-gray-600 mt-1">Total Subjects</p>
+            <h3 className="text-3xl font-bold text-gray-900">{stats?.total_classes || 0}</h3>
+            <p className="text-sm text-gray-600 mt-1">Total Classes</p>
           </div>
 
           {/* Assessments */}
@@ -159,7 +170,7 @@ export default function AdminDashboard() {
 
           {/* Classes Card */}
           <div
-            onClick={() => router.push('/admin/classes/new')} // TODO: Update route and add page
+            onClick={() => router.push('/admin/classes')}
             className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl p-6 hover:shadow-xl transition-all cursor-pointer border border-purple-100 hover:border-purple-300"
           >
             <div className="flex items-center gap-3 mb-3">

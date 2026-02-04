@@ -1,16 +1,15 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
-import { ArrowLeft, Plus, Search } from 'lucide-react'
+import { ArrowLeft, Search, Save, Trash2 } from 'lucide-react'
 import { HARD_CODED_SUBJECTS } from '@/lib/subjects'
 
 interface Subject {
   id: string
   name: string
   category?: string
-  year_level?: string
 }
 
 interface Teacher {
@@ -25,16 +24,29 @@ interface Student {
   email: string
   year_level?: string
   class_names?: string[]
+  class_ids?: string[]
 }
 
-export default function CreateClassPage() {
+interface ClassItem {
+  id: string
+  class_name: string
+  year_level?: string
+  subject_id?: string
+  teacher_id?: string
+  subject_name?: string
+  teacher_name?: string
+}
+
+export default function EditClassPage() {
   const router = useRouter()
+  const params = useParams()
+  const classId = params.id as string
 
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [students, setStudents] = useState<Student[]>([])
-  const [error, setError] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     subject_id: '',
@@ -46,6 +58,7 @@ export default function CreateClassPage() {
   const [selectedStudents, setSelectedStudents] = useState<string[]>([])
   const [studentSearch, setStudentSearch] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [showYearWarning, setShowYearWarning] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -65,21 +78,50 @@ export default function CreateClassPage() {
   async function loadData() {
     try {
       setLoading(true)
-      const [subjectsRes, teachersRes, studentsRes] = (await Promise.all([
+      const [classesRes, subjectsRes, teachersRes, studentsRes] = (await Promise.all([
+        adminApi.getAllClasses(),
         adminApi.getAllSubjects(),
         adminApi.getAllTeachers(),
         adminApi.getAllStudents(),
-      ])) as [{ subjects: Subject[] } | Subject[], { teachers: Teacher[] }, { students: Student[] }]
+      ])) as [
+        { classes?: ClassItem[] },
+        { subjects?: Subject[] } | Subject[],
+        { teachers?: Teacher[] },
+        { students?: Student[] }
+      ]
+
+      const targetClass = classesRes.classes?.find((cls) => cls.id === classId)
+      if (!targetClass) {
+        setError('Class not found')
+        return
+      }
 
       const subjectList = Array.isArray(subjectsRes) ? subjectsRes : subjectsRes.subjects || []
+
       setSubjects(subjectList)
       setTeachers(teachersRes.teachers || [])
       setStudents(studentsRes.students || [])
+
+      const subjectValue = subjectList.length > 0
+        ? (targetClass.subject_id || '')
+        : (targetClass.subject_name || HARD_CODED_SUBJECTS[0]?.name || '')
+
+      setFormData({
+        subject_id: subjectValue,
+        teacher_id: targetClass.teacher_id || '',
+        year_level: targetClass.year_level || '9',
+        class_name: targetClass.class_name || ''
+      })
+
+      const initialSelected = (studentsRes.students || [])
+        .filter((student) => Array.isArray(student.class_ids) && student.class_ids.includes(classId))
+        .map((student) => student.id)
+      setSelectedStudents(initialSelected)
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message)
       } else {
-        setError('Failed to load classes data')
+        setError('Failed to load class data')
       }
     } finally {
       setLoading(false)
@@ -155,7 +197,7 @@ export default function CreateClassPage() {
 
     try {
       setSubmitting(true)
-      await adminApi.createClass({
+      await adminApi.updateClass(classId, {
         ...(useSubjectName ? { subject_name: formData.subject_id } : { subject_id: formData.subject_id }),
         teacher_id: formData.teacher_id,
         year_level: formData.year_level,
@@ -165,9 +207,23 @@ export default function CreateClassPage() {
       router.push('/admin/classes')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error'
-      alert('Failed to create class: ' + message)
+      alert('Failed to update class: ' + message)
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirm('Delete this class? This will remove all student assignments.')) {
+      return
+    }
+
+    try {
+      await adminApi.deleteClass(classId)
+      router.push('/admin/classes')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      alert('Failed to delete class: ' + message)
     }
   }
 
@@ -192,19 +248,28 @@ export default function CreateClassPage() {
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/admin/classes')}
-              className="p-2 hover:bg-violet-50 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-violet-600" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
-                Create New Class
-              </h1>
-              <p className="text-gray-600 mt-1">Set up a new class for your school</p>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.push('/admin/classes')}
+                className="p-2 hover:bg-violet-50 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-violet-600" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
+                  Edit Class
+                </h1>
+                <p className="text-gray-600 mt-1">Update class details and roster</p>
+              </div>
             </div>
+            <button
+              onClick={handleDelete}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-rose-700 border border-rose-700 rounded-lg hover:bg-rose-700/10"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Class
+            </button>
           </div>
         </div>
       </div>
@@ -223,12 +288,8 @@ export default function CreateClassPage() {
                 value={formData.class_name}
                 onChange={(e) => setFormData({ ...formData, class_name: e.target.value })}
                 className="w-full px-4 py-3 border border-violet-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
-                placeholder="e.g., English 10A"
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Use a clear name so students and teachers can spot it quickly.
-              </p>
             </div>
 
             {/* Subject Selection */}
@@ -283,7 +344,13 @@ export default function CreateClassPage() {
               </label>
               <select
                 value={formData.year_level}
-                onChange={(e) => setFormData({ ...formData, year_level: e.target.value })}
+                onChange={(e) => {
+                  if (e.target.value !== formData.year_level) {
+                    setSelectedStudents([])
+                    setShowYearWarning(true)
+                  }
+                  setFormData({ ...formData, year_level: e.target.value })
+                }}
                 className="w-full px-4 py-3 border border-violet-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
                 required
               >
@@ -292,9 +359,11 @@ export default function CreateClassPage() {
                 <option value="11">Year 11</option>
                 <option value="12">Year 12</option>
               </select>
-              <p className="text-xs text-gray-500 mt-1">
-                Students can only be assigned to classes in the same year level.
-              </p>
+              {showYearWarning && (
+                <p className="text-xs text-rose-700 mt-1">
+                  Year level changed. Student selections were cleared to match the new year.
+                </p>
+              )}
             </div>
 
             {/* Assign Students */}
@@ -302,7 +371,7 @@ export default function CreateClassPage() {
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Assign Students (optional)
+                    Assign Students
                   </label>
                   <p className="text-xs text-gray-500">Showing Year {formData.year_level} students.</p>
                 </div>
@@ -311,7 +380,7 @@ export default function CreateClassPage() {
                   onClick={toggleSelectAll}
                   className="text-sm font-medium text-violet-600 hover:text-violet-700"
                 >
-                  {allFilteredSelected ? 'Clear all' : 'Select all'}
+                  {allFilteredSelected ? 'Clear filtered' : 'Select filtered'}
                 </button>
               </div>
 
@@ -385,27 +454,16 @@ export default function CreateClassPage() {
                 className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? (
-                  <>Creating...</>
+                  <>Saving...</>
                 ) : (
                   <>
-                    <Plus className="w-4 h-4" />
-                    Create Class
+                    <Save className="w-4 h-4" />
+                    Save Changes
                   </>
                 )}
               </button>
             </div>
           </form>
-        </div>
-
-        {/* Help Section */}
-        <div className="mt-6 bg-violet-50 border border-violet-200 rounded-xl p-4">
-          <h3 className="font-medium text-violet-900 mb-2">Quick Tips</h3>
-          <ul className="text-sm text-violet-800 space-y-1">
-            <li>• Class names should be unique and descriptive</li>
-            <li>• Students can be assigned now or later via Edit</li>
-            <li>• Teachers can be changed later if needed</li>
-            <li>• Subjects are fixed and managed automatically</li>
-          </ul>
         </div>
       </div>
     </div>

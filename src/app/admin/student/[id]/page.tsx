@@ -15,6 +15,8 @@ interface StudentProfile {
   year_level: string
   class_name?: string
   class_id?: string
+  class_names?: string[]
+  class_ids?: string[]
   school_id: string
 }
 
@@ -195,12 +197,12 @@ export default function StudentDetailsPage() {
     return (
       <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
         <div className="max-w-4xl mx-auto p-6">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-red-900 mb-2">Error</h2>
-            <p className="text-red-800">{error}</p>
+          <div className="bg-rose-700/10 border border-rose-700/30 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-rose-700 mb-2">Error</h2>
+            <p className="text-rose-700">{error}</p>
             <button
               onClick={() => router.push('/admin/')}
-              className="cursor-pointer mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              className="cursor-pointer mt-4 px-4 py-2 bg-rose-700 text-white rounded-lg hover:bg-rose-800"
             >
               Back to Dashboard
             </button>
@@ -260,90 +262,93 @@ export default function StudentDetailsPage() {
           {/* Sidebar */}
           <aside className="lg:sticky lg:top-6 h-fit">
             <div className="space-y-3.5 rounded-2xl border border-slate-700/40 bg-slate-900/90 p-3 shadow-lg ring-1 ring-slate-800/40">
-            {/* Career Matches */}
-            <a
-              href="#career-matches"
-              aria-current={activeSection === "career-matches" ? "page" : undefined}
-              className={`${sidebarItemClass} scroll-mt-24 ${
-                activeSection === "career-matches" ? "bg-white/20 ring-1 ring-white/25" : ""
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-2.5">
-                <ClipboardCheck className="w-4.5 h-4.5 text-teal-200" />
-                <h2 className="text-base font-semibold text-slate-50">Career Matches</h2>
+              <div className="px-2 pt-1 text-[11px] tracking-[0.3em] text-slate-500 font-mono">
+                ON THIS PAGE
               </div>
-              <p className="text-sm text-slate-300">
-                {hasAssessment && ranking.length > 0 ? `View matches.` : "No matches yet."}
-              </p>
-            </a>
+              {/* Career Matches */}
+              <a
+                href="#career-matches"
+                aria-current={activeSection === "career-matches" ? "page" : undefined}
+                className={`${sidebarItemClass} scroll-mt-24 ${
+                  activeSection === "career-matches" ? "bg-white/20 ring-1 ring-white/25" : ""
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2.5">
+                  <ClipboardCheck className="w-4.5 h-4.5 text-teal-200" />
+                  <h2 className="text-base font-semibold text-slate-50">Career Matches</h2>
+                </div>
+                <p className="text-sm text-slate-300">
+                  {hasAssessment && ranking.length > 0 ? `View matches.` : "No matches yet."}
+                </p>
+              </a>
 
-            {/* Teacher Comments */}
-            <a
-              href="#teacher-comments"
-              aria-current={activeSection === "teacher-comments" ? "page" : undefined}
-              className={`${sidebarItemClass} scroll-mt-24 ${
-                activeSection === "teacher-comments" ? "bg-white/20 ring-1 ring-white/25" : ""
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-2.5">
-                <MessageSquare className="w-4.5 h-4.5 text-violet-200" />
-                <h2 className="text-base font-semibold text-slate-50">Teacher Comments</h2>
-              </div>
-              <p className="text-sm text-slate-300">
-                {studentData.comments && studentData.comments.length > 0
-                  ? `${studentData.comments.length} comment${studentData.comments.length > 1 ? "s" : ""}`
-                  : "No comments yet."}
-              </p>
-            </a>
+              {/* Teacher Comments */}
+              <a
+                href="#teacher-comments"
+                aria-current={activeSection === "teacher-comments" ? "page" : undefined}
+                className={`${sidebarItemClass} scroll-mt-24 ${
+                  activeSection === "teacher-comments" ? "bg-white/20 ring-1 ring-white/25" : ""
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2.5">
+                  <MessageSquare className="w-4.5 h-4.5 text-violet-200" />
+                  <h2 className="text-base font-semibold text-slate-50">Teacher Comments</h2>
+                </div>
+                <p className="text-sm text-slate-300">
+                  {studentData.comments && studentData.comments.length > 0
+                    ? `${studentData.comments.length} comment${studentData.comments.length > 1 ? "s" : ""}`
+                    : "No comments yet."}
+                </p>
+              </a>
 
-            {/* Subjects Taken */}
-            <a
-              href="#subjects-taken"
-              aria-current={activeSection === "subjects-taken" ? "page" : undefined}
-              className={`${sidebarItemClass} scroll-mt-24 ${
-                activeSection === "subjects-taken" ? "bg-white/20 ring-1 ring-white/25" : ""
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-2.5">
-                <BookOpen className="w-4.5 h-4.5 text-teal-200" />
-                <h2 className="text-base font-semibold text-slate-50">Subjects Taken</h2>
-              </div>
-              <p className="text-sm text-slate-300">
-                {studentData.subjects && studentData.subjects.length > 0
-                  ? `${studentData.subjects.length} subject${studentData.subjects.length > 1 ? "s" : ""}`
-                  : "No subjects listed."}
-              </p>
-            </a>
+              {/* Subjects Taken */}
+              <a
+                href="#subjects-taken"
+                aria-current={activeSection === "subjects-taken" ? "page" : undefined}
+                className={`${sidebarItemClass} scroll-mt-24 ${
+                  activeSection === "subjects-taken" ? "bg-white/20 ring-1 ring-white/25" : ""
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2.5">
+                  <BookOpen className="w-4.5 h-4.5 text-teal-200" />
+                  <h2 className="text-base font-semibold text-slate-50">Subjects Taken</h2>
+                </div>
+                <p className="text-sm text-slate-300">
+                  {studentData.subjects && studentData.subjects.length > 0
+                    ? `${studentData.subjects.length} subject${studentData.subjects.length > 1 ? "s" : ""}`
+                    : "No subjects listed."}
+                </p>
+              </a>
 
-            {/* Report */}
-            <a
-              href="#report"
-              aria-current={activeSection === "report" ? "page" : undefined}
-              className={`${sidebarItemClass} scroll-mt-24 ${
-                activeSection === "report" ? "bg-white/20 ring-1 ring-white/25" : ""
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-2.5">
-                <FileText className="w-4.5 h-4.5 text-teal-200" />
-                <h2 className="text-base font-semibold text-slate-50">Report</h2>
-              </div>
-              <p className="text-sm text-slate-300">
-                {studentData.report?.title || "No report available yet."}
-              </p>
-            </a>
-            <a
-              href="#career-aspiration"
-              aria-current={activeSection === "career-aspiration" ? "page" : undefined}
-              className={`${sidebarItemClass} scroll-mt-24 ${
-                activeSection === "career-aspiration" ? "bg-white/20 ring-1 ring-white/25" : ""
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-2.5">
-                <FileText className="w-4.5 h-4.5 text-violet-200" />
-                <h2 className="text-base font-semibold text-slate-50">Career Aspiration</h2>
-              </div>
-              <p className="text-sm text-slate-300">No career selected.</p>
-            </a>
+              {/* Report */}
+              <a
+                href="#report"
+                aria-current={activeSection === "report" ? "page" : undefined}
+                className={`${sidebarItemClass} scroll-mt-24 ${
+                  activeSection === "report" ? "bg-white/20 ring-1 ring-white/25" : ""
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2.5">
+                  <FileText className="w-4.5 h-4.5 text-teal-200" />
+                  <h2 className="text-base font-semibold text-slate-50">Report</h2>
+                </div>
+                <p className="text-sm text-slate-300">
+                  {studentData.report?.title || "No report available yet."}
+                </p>
+              </a>
+              <a
+                href="#career-aspiration"
+                aria-current={activeSection === "career-aspiration" ? "page" : undefined}
+                className={`${sidebarItemClass} scroll-mt-24 ${
+                  activeSection === "career-aspiration" ? "bg-white/20 ring-1 ring-white/25" : ""
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2.5">
+                  <FileText className="w-4.5 h-4.5 text-violet-200" />
+                  <h2 className="text-base font-semibold text-slate-50">Career Aspiration</h2>
+                </div>
+                <p className="text-sm text-slate-300">No career selected.</p>
+              </a>
             </div>
           </aside>
 
@@ -352,20 +357,36 @@ export default function StudentDetailsPage() {
             <div id="overview" className="bg-white rounded-2xl shadow-sm p-8 border border-violet-100 scroll-mt-24">
               <div className="flex justify-between items-start gap-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  <h1 className="text-3xl font-bold text-emerald-800 mb-2">
                     {studentData.profile.full_name}
                   </h1>
                   <div className="space-y-1">
                     <p className="text-gray-600">{studentData.profile.email}</p>
-                    <p className="text-gray-600">
-                      Class {studentData.profile.class_name || studentData.profile.year_level}
-                    </p>
+                    <div className="flex flex-wrap gap-2 text-gray-600">
+                      <span className="px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-medium">
+                        Year {studentData.profile.year_level || '—'}
+                      </span>
+                      {Array.isArray(studentData.profile.class_names) && studentData.profile.class_names.length > 0 ? (
+                        studentData.profile.class_names.map((name, idx) => (
+                          <span
+                            key={`class-${idx}`}
+                            className="px-2.5 py-1 rounded-full bg-violet-100 text-violet-700 text-xs font-medium"
+                          >
+                            {name}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
+                          Unassigned
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => router.push(`/admin/student/${studentId}/edit`)}
-                    className="cursor-pointer p-2 border border-violet-200 text-violet-600 rounded-lg hover:bg-violet-50 transition-colors"
+                    className="cursor-pointer p-2 border border-gray-200 text-black rounded-lg hover:bg-gray-50 transition-colors"
                     aria-label="Edit student"
                     title="Edit student"
                   >
@@ -373,7 +394,7 @@ export default function StudentDetailsPage() {
                   </button>
                   <button
                     onClick={handleDeleteStudent}
-                    className="cursor-pointer p-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                    className="cursor-pointer p-2 border border-rose-700 text-rose-700 rounded-lg hover:bg-rose-700/10 transition-colors"
                     aria-label="Delete student"
                     title="Delete student"
                   >

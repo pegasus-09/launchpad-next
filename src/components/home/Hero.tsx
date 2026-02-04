@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden py-32 bg-linear-to-b from-white via-violet-50/30 to-teal-50/30">
+    <section className="relative overflow-hidden py-36 bg-linear-to-b from-white via-violet-50/30 to-teal-50/30">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(139,92,246,0.08),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(20,184,166,0.08),transparent_50%)]" />
       <div className="relative mx-auto max-w-4xl px-6 text-center">
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900">

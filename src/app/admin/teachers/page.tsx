@@ -86,7 +86,7 @@ export default function TeachersPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-red-600">Error: {error}</div>
+        <div className="text-rose-700">Error: {error}</div>
       </div>
     )
   }
@@ -105,7 +105,7 @@ export default function TeachersPage() {
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
             >
               <UserPlus className="w-5 h-5" />
               Add Teacher
@@ -144,7 +144,7 @@ export default function TeachersPage() {
                 className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
               >
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  <h3 className="text-lg font-semibold text-emerald-800 mb-1">
                     {teacher.full_name}
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">{teacher.email}</p>

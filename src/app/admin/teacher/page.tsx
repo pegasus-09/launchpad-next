@@ -38,6 +38,20 @@ export default function TeachersPage() {
     loadTeachers()
   }, [])
 
+  useEffect(() => {
+    if (!activeMenuId) return
+
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Element | null
+      if (!target) return
+      if (target.closest('[data-teacher-menu]')) return
+      setActiveMenuId(null)
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [activeMenuId])
+
   async function loadTeachers() {
     try {
       setLoading(true)
@@ -101,7 +115,7 @@ export default function TeachersPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50 flex items-center justify-center">
-        <div className="text-red-600">Error: {error}</div>
+        <div className="text-rose-700">Error: {error}</div>
       </div>
     )
   }
@@ -128,7 +142,7 @@ export default function TeachersPage() {
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-violet-600 to-teal-600 text-white rounded-lg hover:shadow-lg transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
             >
               <UserPlus className="w-5 h-5" />
               Add Teacher
@@ -169,12 +183,12 @@ export default function TeachersPage() {
                 <div className="p-6">
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                        {teacher.full_name}
-                      </h3>
+                  <h3 className="text-lg font-semibold text-emerald-800 mb-1">
+                    {teacher.full_name}
+                  </h3>
                       <p className="text-sm text-gray-600">{teacher.email}</p>
                     </div>
-                    <div className="relative">
+                    <div className="relative" data-teacher-menu>
                       <button
                         type="button"
                         onClick={(event) => {
@@ -194,15 +208,15 @@ export default function TeachersPage() {
                           <button
                             type="button"
                             onClick={() => router.push(`/admin/teacher/${teacher.id}`)}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-violet-50"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-black bg-white hover:bg-gray-100 transition-colors"
                           >
-                            <Pencil className="w-4 h-4 text-violet-600" />
+                            <Pencil className="w-4 h-4" />
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteTeacher(teacher.id)}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-700 hover:bg-rose-700/10 transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                             Delete
@@ -348,7 +362,7 @@ export default function TeachersPage() {
               </button>
               <button
                 onClick={handleAddTeacher}
-                className="px-4 py-2 bg-linear-to-r from-violet-600 to-teal-600 text-white rounded-lg hover:shadow-lg transition-all"
+                className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
               >
                 Add Teacher
               </button>
