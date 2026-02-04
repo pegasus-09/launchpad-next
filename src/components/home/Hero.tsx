@@ -6,13 +6,13 @@ export default function Hero() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(139,92,246,0.08),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(20,184,166,0.08),transparent_50%)]" />
       <div className="relative mx-auto max-w-4xl px-6 text-center">
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900">
-          Discover your perfect career with{" "}
+          Career guidance for students with{" "}
           <span className="bg-linear-to-r from-violet-600 to-teal-500 bg-clip-text text-transparent">Launchpad</span>
         </h1>
 
         <p className="mt-6 text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-          Take our psychometric assessment to get personalised career recommendations
-          based on your unique strengths, interests, and values.
+          Psychometric assessments and personalised career recommendations
+          tailored to each student&apos;s strengths, interests, and values.
         </p>
 
         <div className="mt-10 flex justify-center gap-4">

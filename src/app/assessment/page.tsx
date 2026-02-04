@@ -46,9 +46,9 @@ export default function AssessmentPage() {
       if (profile.role !== 'student') {
         // Redirect non-students to their appropriate dashboard
         if (profile.role === 'teacher') {
-          router.push('/teacher/dashboard')
+          router.push('/teacher/')
         } else if (profile.role === 'admin') {
-          router.push('/admin/dashboard')
+          router.push('/admin/')
         } else {
           router.push('/login')
         }
@@ -60,7 +60,7 @@ export default function AssessmentPage() {
     checkAuth()
   }, [router])
 
-  // Organize questions by section
+  // Organise questions by section
   const sections = [
     { title: "Aptitudes", questions: QUESTIONS.filter(q => q.id.startsWith('A')) },
     { title: "Interests", questions: QUESTIONS.filter(q => q.id.startsWith('I')) },
@@ -86,7 +86,7 @@ export default function AssessmentPage() {
 
     try {
       await studentApi.submitAssessment(answers)
-      router.push('/dashboard')
+      router.push('/student')
     } catch (err: any) {
       console.error('Assessment submission error:', err)
       setError(err.message || 'Failed to submit assessment')

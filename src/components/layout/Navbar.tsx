@@ -30,7 +30,7 @@ export default function Navbar() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const showBackButton = pathname !== "/" && pathname !== "/dashboard"
+  const showBackButton = pathname !== "/" && pathname !== "/redirect"
 
   async function handleLogout() {
     const supabase = createClient()
@@ -72,7 +72,7 @@ export default function Navbar() {
               {user ? (
                 <>
                   <Link
-                    href="/dashboard"
+                    href="/redirect"
                     className="text-gray-300 hover:text-white transition-colors"
                   >
                     Dashboard

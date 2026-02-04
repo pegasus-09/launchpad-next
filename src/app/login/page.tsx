@@ -39,7 +39,7 @@ function LoginContent() {
         }
 
         if (data.session) {
-            router.push("/dashboard")
+            router.push("/redirect");
         }
 
         setLoading(false);

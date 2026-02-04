@@ -94,7 +94,7 @@ export default function StudentDetailsPage() {
             <h2 className="text-lg font-semibold text-red-900 mb-2">Error</h2>
             <p className="text-red-800">{error}</p>
             <button
-              onClick={() => router.push('/admin/dashboard')}
+              onClick={() => router.push('/admin/')}
               className="cursor-pointer mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
             >
               Back to Dashboard
@@ -118,7 +118,7 @@ export default function StudentDetailsPage() {
         {/* Back Button */}
         <div>
           <button
-            onClick={() => router.push('/admin/dashboard')}
+            onClick={() => router.push('/admin/')}
             className="cursor-pointer flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <svg
@@ -207,9 +207,7 @@ export default function StudentDetailsPage() {
               </svg>
               <div>
                 <p className="font-medium text-teal-900">Assessment Completed</p>
-                <p className="text-sm text-teal-700">
-                  {ranking.length} career matches generated
-                </p>
+                
               </div>
             </div>
           )}
@@ -220,10 +218,10 @@ export default function StudentDetailsPage() {
           <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Top Career Matches</h2>
             <div className="space-y-3">
-              {ranking.slice(0, 10).map(([code, title, score], index) => (
+              {ranking.slice(0, 5).map(([code, title, score], index) => (
                 <div
                   key={code}
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-violet-300 transition-colors"
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-xl"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex items-center justify-center w-10 h-10 bg-violet-100 text-violet-700 font-bold rounded-full">
@@ -243,22 +241,12 @@ export default function StudentDetailsPage() {
                 </div>
               ))}
             </div>
-
-            {ranking.length > 10 && (
-              <button
-                onClick={() => {
-                  // TODO: Show all results
-                }}
-                className="cursor-pointer mt-4 w-full py-3 border border-violet-300 text-violet-600 rounded-xl hover:bg-violet-50 transition-colors font-medium"
-              >
-                View All {ranking.length} Matches
-              </button>
-            )}
           </div>
         )}
 
         {/* Assessment Answers Summary (Optional) */}
         {hasAssessment && studentData.assessment?.raw_answers && (
+          // TODO: Make this a detailed breakdown page
           <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Assessment Summary</h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

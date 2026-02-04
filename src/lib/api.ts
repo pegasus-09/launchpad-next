@@ -1,9 +1,9 @@
 // src/lib/api.ts
 // Backend API client with authentication and role-based endpoints
+// UPDATED VERSION with admin teacher/subject/reports endpoints
 
 import { createClient } from '@/lib/supabase/client'
 import { getCurrentUserProfile, UserProfile } from './auth/roleCheck'
-import { use } from 'react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -30,6 +30,7 @@ async function authenticatedFetch(
     headers: {
       ...options.headers,
       'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
     },
   })
 }
@@ -48,7 +49,7 @@ export const guestApi = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ answers }) // ← Wrapped in object
+      body: JSON.stringify({ answers })
     })
 
     if (!response.ok) {
@@ -65,7 +66,7 @@ export const guestApi = {
 // ============================================================================
 export const authApi = {
   /**
-   * Get current user's profile
+   * Get current user's school
    */
   async getSchool(userProfile: UserProfile) {
     const supabase = createClient()
@@ -79,7 +80,6 @@ export const authApi = {
           .single()
     return schoolData
   },
-
 }
 
 // ============================================================================
@@ -93,10 +93,7 @@ export const studentApi = {
   async submitAssessment(answers: Record<string, number>) {
     const response = await authenticatedFetch('/student/assessment', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ answers }) // ← Wrapped in object
+      body: JSON.stringify({ answers })
     })
 
     if (!response.ok) {
@@ -133,40 +130,12 @@ export const studentApi = {
   }) {
     const response = await authenticatedFetch('/student/work-experience', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     })
 
     if (!response.ok) {
       const error = await response.text()
       throw new Error(`Failed to add work experience: ${error}`)
-    }
-
-    return response.json()
-  },
-
-  /**
-   * Add project
-   */
-  async addProject(data: {
-    title: string
-    description: string
-    subject_id?: string
-    url?: string
-  }) {
-    const response = await authenticatedFetch('/student/project', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-
-    if (!response.ok) {
-      const error = await response.text()
-      throw new Error(`Failed to add project: ${error}`)
     }
 
     return response.json()
@@ -193,32 +162,17 @@ export const teacherApi = {
   },
 
   /**
-   * Get specific student's profile
-   */
-  async getStudentProfile(studentId: string) {
-    const response = await authenticatedFetch(`/teacher/student/${studentId}`)
-
-    if (!response.ok) {
-      const error = await response.text()
-      throw new Error(`Failed to load student profile: ${error}`)
-    }
-
-    return response.json()
-  },
-
-  /**
    * Add comment on student
    */
   async addComment(data: {
     student_id: string
-    comment: string
-    category?: string
+    class_id: string
+    comment_text: string
+    performance_rating?: number
+    engagement_rating?: number
   }) {
     const response = await authenticatedFetch('/teacher/comment', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     })
 
@@ -273,6 +227,171 @@ export const adminApi = {
     if (!response.ok) {
       const error = await response.text()
       throw new Error(`Failed to load statistics: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  // ========================================================================
+  // TEACHER MANAGEMENT
+  // ========================================================================
+
+  /**
+   * Get all teachers in the school
+   */
+  async getAllTeachers() {
+    const response = await authenticatedFetch('/admin/teachers')
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load teachers: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Get detailed teacher profile
+   */
+  async getTeacherProfile(teacherId: string) {
+    const response = await authenticatedFetch(`/admin/teacher/${teacherId}`)
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load teacher profile: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Add new teacher
+   */
+  async addTeacher(data: {
+    email: string
+    password: string
+    full_name: string
+  }) {
+    const response = await authenticatedFetch('/admin/teacher', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to add teacher: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Update teacher profile
+   */
+  async updateTeacher(teacherId: string, data: {
+    full_name?: string
+    email?: string
+  }) {
+    const response = await authenticatedFetch(`/admin/teacher/${teacherId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to update teacher: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Delete teacher
+   */
+  async deleteTeacher(teacherId: string) {
+    const response = await authenticatedFetch(`/admin/teacher/${teacherId}`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to delete teacher: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  // ========================================================================
+  // SUBJECT MANAGEMENT
+  // ========================================================================
+
+  /**
+   * Get all subjects in the school
+   */
+  async getAllSubjects() {
+    const response = await authenticatedFetch('/admin/subjects')
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load subjects: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  // ========================================================================
+  // CLASS MANAGEMENT
+  // ========================================================================
+
+  /**
+   * Get all classes in the school
+   */
+  async getAllClasses() {
+    const response = await authenticatedFetch('/admin/classes')
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load classes: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Create new class
+   */
+  async createClass(data: {
+    subject_id: string
+    teacher_id: string
+    year_level: string
+    class_name: string
+  }) {
+    const response = await authenticatedFetch('/admin/class', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to create class: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  // ========================================================================
+  // REPORTS
+  // ========================================================================
+
+  /**
+   * Get reports summary
+   */
+  async getReportsSummary() {
+    const response = await authenticatedFetch('/admin/reports/summary')
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load reports: ${error}`)
     }
 
     return response.json()

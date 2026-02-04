@@ -1,16 +1,15 @@
 const steps = [
-  { title: "Take the assessment", description: "Complete our comprehensive psychometric quiz - no login required to start" },
-  { title: "Create your account", description: "Sign up to save your results and access your personalised dashboard" },
-  { title: "Explore career matches", description: "View ranked career recommendations based on your unique profile" },
+  { title: "Take the assessment", description: "Complete our comprehensive psychometric quiz" },
+  { title: "Explore career matches", description: "View ranked career recommendations based on your unique profile and your teachers' insights" },
   { title: "Build your portfolio", description: "Showcase your projects and experiences, export as PDF for applications" },
 ]
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-24 bg-white">
+    <section id="how-it-works" className="pt-12 pb-24 bg-white">
       <div className="mx-auto max-w-4xl px-6">
         <h2 className="mb-4 text-3xl md:text-4xl font-bold text-gray-900 text-center">How it works</h2>
-        <p className="mb-12 text-center text-gray-600">Get started in just four simple steps</p>
+        <p className="mb-12 text-center text-gray-600">Get started in just three simple steps</p>
 
         <div className="space-y-4">
           {steps.map((step, index) => (

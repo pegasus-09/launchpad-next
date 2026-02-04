@@ -44,8 +44,8 @@ export default function DashboardLayout({ children }: Props) {
     }
 
     const navItems: NavItem[] = [
-        { id: 1, label: 'Dashboard', href: '/dashboard' },
-        { id: 2, label: 'Assessment', href: '/assessment' },
+        { id: 1, label: 'Dashboard', href: '/student' },
+        { id: 2, label: 'Assessmet', href: '/assessment' },
         // { id: 3, label: 'Portfolio', href: '/portfolio' }
     ];
 
@@ -54,7 +54,7 @@ export default function DashboardLayout({ children }: Props) {
             {/* Sidebar */}
             <aside className="fixed inset-y-0 left-0 flex w-64 flex-col border-r bg-gray-900 px-4 py-6">
                 <div className="flex flex-col space-y-7.5">
-                    <Link href="/student/dashboard" className="text-3xl font-bold font-mono">
+                    <Link href="/student/" className="text-3xl font-bold font-mono">
                         <span className="text-violet-400">launch</span>
                         <span className="text-teal-400">pad</span>
                     </Link>

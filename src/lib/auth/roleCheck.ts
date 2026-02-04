@@ -74,13 +74,13 @@ export async function requireRole(allowedRoles: UserRole | UserRole[]): Promise<
 export function getRoleDashboard(role: UserRole): string {
   switch (role) {
     case 'student':
-      return '/dashboard'
+      return '/student/'
     case 'teacher':
-      return '/teacher/dashboard'
+      return '/teacher/'
     case 'admin':
-      return '/admin/dashboard'
+      return '/admin/'
     default:
-      return '/dashboard'
+      return '/redirect'
   }
 }
 

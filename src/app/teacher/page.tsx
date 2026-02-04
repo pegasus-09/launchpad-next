@@ -90,21 +90,21 @@ export default function TeacherDashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-violet-100 hover:border-violet-300 transition-all hover:shadow-md">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-violet-100">
           <div className="text-3xl font-bold text-violet-600 mb-2">
             {students.length}
           </div>
           <div className="text-sm text-gray-600">Total Students</div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-teal-100 hover:border-teal-300 transition-all hover:shadow-md">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-teal-100">
           <div className="text-3xl font-bold text-teal-600 mb-2">
             {students.filter(s => s.subjects && s.subjects.length > 0).length}
           </div>
           <div className="text-sm text-gray-600">Active in Subjects</div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-violet-100 hover:border-violet-300 transition-all hover:shadow-md">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-violet-100">
           <div className="text-3xl font-bold text-violet-500 mb-2">
             {new Set(students.map(s => s.year_level)).size}
           </div>

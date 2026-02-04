@@ -21,13 +21,13 @@ export default function DashboardRouter() {
         // Redirect based on role
         switch (profile.role) {
           case 'admin':
-            router.push('/admin/dashboard')
+            router.push('/admin/')
             break
           case 'teacher':
-            router.push('/teacher/dashboard')
+            router.push('/teacher/')
             break
           case 'student':
-            router.push('/student/dashboard')
+            router.push('/student/')
             break
           default:
             router.push('/login')

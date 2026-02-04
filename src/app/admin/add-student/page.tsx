@@ -23,7 +23,7 @@ export default function AddStudentPage() {
       try {
         await requireRole('admin')
       } catch (err) {
-        router.push('/admin/dashboard')
+        router.push('/admin/')
       }
     }
     checkAuth()
@@ -70,7 +70,7 @@ export default function AddStudentPage() {
 
       // Redirect after 2 seconds
       setTimeout(() => {
-        router.push('/admin/dashboard')
+        router.push('/admin/')
       }, 2000)
 
     } catch (err: any) {
@@ -85,7 +85,7 @@ export default function AddStudentPage() {
       <div className="max-w-2xl mx-auto p-6 py-12">
         <div className="mb-6">
           <button
-            onClick={() => router.push('/admin/dashboard')}
+            onClick={() => router.push('/admin/')}
             className="cursor-pointer flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <svg
@@ -188,7 +188,7 @@ export default function AddStudentPage() {
             <div className="flex gap-3 pt-4">
               <button
                 type="button"
-                onClick={() => router.push('/admin/dashboard')}
+                onClick={() => router.push('/admin/')}
                 className="cursor-pointer flex-1 px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all font-medium"
               >
                 Cancel
