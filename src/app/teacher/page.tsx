@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { teacherApi, authApi } from "@/lib/api"
 import { requireRole } from "@/lib/auth/roleCheck"
@@ -22,7 +22,15 @@ export default function TeacherDashboard() {
   const [schoolName, setSchoolName] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  const effectRan = useRef(false);
+
   useEffect(() => {
+    // Prevent double-invocation in strict mode
+    if (effectRan.current === true) {
+      return;
+    }
+    console.log("TeacherDashboard useEffect is running. This should now only appear once.");
+
     async function loadData() {
       try {
         // Check authentication and role
@@ -51,6 +59,10 @@ export default function TeacherDashboard() {
     }
 
     loadData()
+
+    return () => {
+      effectRan.current = true
+    }
   }, [])
 
   if (loading) {
