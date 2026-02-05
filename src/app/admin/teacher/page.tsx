@@ -25,14 +25,7 @@ export default function TeachersPage() {
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [showAddModal, setShowAddModal] = useState(false)
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null)
-  
-  const [newTeacher, setNewTeacher] = useState({
-    full_name: '',
-    email: '',
-    password: ''
-  })
 
   useEffect(() => {
     loadTeachers()
@@ -65,23 +58,6 @@ export default function TeachersPage() {
       }
     } finally {
       setLoading(false)
-    }
-  }
-
-  async function handleAddTeacher() {
-    if (!newTeacher.full_name || !newTeacher.email || !newTeacher.password) {
-      alert('Please fill in all fields')
-      return
-    }
-
-    try {
-      await adminApi.addTeacher(newTeacher)
-      await loadTeachers()
-      setShowAddModal(false)
-      setNewTeacher({ full_name: '', email: '', password: '' })
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unknown error'
-      alert('Failed to add teacher: ' + message)
     }
   }
 
@@ -125,26 +101,28 @@ export default function TeachersPage() {
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-4 mb-4">
-            <button
-              onClick={() => router.push('/admin')}
-              className="p-2 hover:bg-violet-50 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-violet-600" />
-            </button>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
-                Teachers
-              </h1>
-              <p className="text-gray-600 mt-1">
-                {teachers.length} teacher{teachers.length !== 1 ? 's' : ''} in your school
-              </p>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.push('/admin')}
+                className="p-2 hover:bg-violet-50 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-violet-600" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
+                  Teachers
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  {teachers.length} teacher{teachers.length !== 1 ? 's' : ''} in your school
+                </p>
+              </div>
             </div>
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={() => router.push('/admin/teacher/new')}
               className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
             >
-              <UserPlus className="w-5 h-5" />
+              <UserPlus className="w-4 h-4" />
               Add Teacher
             </button>
           </div>
@@ -298,78 +276,6 @@ export default function TeachersPage() {
         )}
       </div>
 
-      {/* Add Teacher Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold mb-4 bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
-              Add New Teacher
-            </h3>
-            
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={newTeacher.full_name}
-                  onChange={(e) => setNewTeacher({ ...newTeacher, full_name: e.target.value })}
-                  className="w-full px-3 py-2 border border-violet-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                  placeholder="John Smith"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={newTeacher.email}
-                  onChange={(e) => setNewTeacher({ ...newTeacher, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-violet-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                  placeholder="john.smith@school.edu"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Temporary Password
-                </label>
-                <input
-                  type="password"
-                  value={newTeacher.password}
-                  onChange={(e) => setNewTeacher({ ...newTeacher, password: e.target.value })}
-                  className="w-full px-3 py-2 border border-violet-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                  placeholder="••••••••"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Teacher can change this after first login
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => {
-                  setShowAddModal(false)
-                  setNewTeacher({ full_name: '', email: '', password: '' })
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddTeacher}
-                className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
-              >
-                Add Teacher
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

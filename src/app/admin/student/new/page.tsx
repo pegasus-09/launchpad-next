@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { ArrowLeft } from "lucide-react"
 import { requireRole } from "@/lib/auth/roleCheck"
 import { createClient } from "@/lib/supabase/client"
 
@@ -10,7 +11,7 @@ export default function AddStudentPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -36,15 +37,14 @@ export default function AddStudentPage() {
     setSuccess(false)
 
     try {
-      // Get auth token
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
-      
+
       if (!session) {
         throw new Error('Not authenticated')
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/add-student`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/new`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,8 +59,6 @@ export default function AddStudentPage() {
       }
 
       setSuccess(true)
-      
-      // Reset form
       setFormData({
         email: "",
         password: "",
@@ -68,11 +66,9 @@ export default function AddStudentPage() {
         year_level: "9"
       })
 
-      // Redirect after 2 seconds
       setTimeout(() => {
-        router.push('/admin/')
-      }, 2000)
-
+        router.push('/admin/student')
+      }, 1500)
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message)
@@ -86,32 +82,28 @@ export default function AddStudentPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
-      <div className="max-w-2xl mx-auto p-6 py-12">
-        <div className="mb-6">
-          <button
-            onClick={() => router.push('/admin/')}
-            className="cursor-pointer flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
+      {/* Header */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push('/admin/student')}
+              className="p-2 hover:bg-violet-50 rounded-lg transition-colors"
             >
-              <path
-                fillRule="evenodd"
-                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Back to Dashboard
-          </button>
+              <ArrowLeft className="w-5 h-5 text-violet-600" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
+                Add Student
+              </h1>
+              <p className="text-gray-600 mt-1">Create a new student account</p>
+            </div>
+          </div>
         </div>
+      </div>
 
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-2xl shadow-sm p-8 border border-violet-100">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Add New Student</h1>
-          <p className="text-gray-600 mb-8">Create a new student account</p>
-
           {error && (
             <div className="mb-6 p-4 bg-rose-700/10 border border-rose-700/30 rounded-lg">
               <p className="text-rose-700 text-sm">{error}</p>
@@ -119,8 +111,8 @@ export default function AddStudentPage() {
           )}
 
           {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-800 text-sm">
+            <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <p className="text-emerald-800 text-sm">
                 ✓ Student added successfully! Redirecting...
               </p>
             </div>
@@ -136,7 +128,7 @@ export default function AddStudentPage() {
                 required
                 value={formData.full_name}
                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-violet-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
                 placeholder="John Smith"
               />
             </div>
@@ -150,7 +142,7 @@ export default function AddStudentPage() {
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-violet-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
                 placeholder="john.smith@school.edu"
               />
             </div>
@@ -165,7 +157,7 @@ export default function AddStudentPage() {
                 minLength={6}
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-violet-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
                 placeholder="Minimum 6 characters"
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -180,7 +172,7 @@ export default function AddStudentPage() {
               <select
                 value={formData.year_level}
                 onChange={(e) => setFormData({ ...formData, year_level: e.target.value })}
-                className="cursor-pointer w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+                className="cursor-pointer w-full px-4 py-3 border border-violet-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
               >
                 <option value="9">Year 9</option>
                 <option value="10">Year 10</option>
@@ -192,7 +184,7 @@ export default function AddStudentPage() {
             <div className="flex gap-3 pt-4">
               <button
                 type="button"
-                onClick={() => router.push('/admin/')}
+                onClick={() => router.push('/admin/student')}
                 className="cursor-pointer flex-1 px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all font-medium"
               >
                 Cancel
@@ -200,7 +192,7 @@ export default function AddStudentPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="cursor-pointer flex-1 px-6 py-3 bg-violet-600 text-white rounded-xl hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
+                className="cursor-pointer flex-1 px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
               >
                 {loading ? "Adding..." : "Add Student"}
               </button>

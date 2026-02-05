@@ -73,7 +73,7 @@ export default function StudentsPage() {
         label: 'Assessment not submitted',
         icon: XCircle,
         iconClass: 'text-rose-700',
-        bgClass: 'bg-gray-100'
+        bgClass: 'bg-rose-100'
       }
     }
 
@@ -129,7 +129,7 @@ export default function StudentsPage() {
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/admin')}
@@ -147,7 +147,7 @@ export default function StudentsPage() {
               </div>
             </div>
             <button
-              onClick={() => router.push('/admin/add-student')}
+              onClick={() => router.push('/admin/student/new')}
               className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
             >
               <UserPlus className="w-4 h-4" />

@@ -191,7 +191,7 @@ export default function CreateClassPage() {
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push('/admin/classes')}
@@ -210,7 +210,7 @@ export default function CreateClassPage() {
       </div>
 
       {/* Form */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-2xl shadow-sm border border-violet-100 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Class Name */}
