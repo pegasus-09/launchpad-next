@@ -162,9 +162,39 @@ export const teacherApi = {
   },
 
   /**
-   * Add comment on student
+   * Get a specific student for the teacher, along with their classes taught by this teacher.
+   * This assumes the backend endpoint exists and returns student details including relevant classes.
    */
-  async addComment(data: {
+  async getStudent(studentId: string) {
+    const response = await authenticatedFetch(`/teacher/student/${studentId}`);
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to load student: ${error}`);
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Get classes for a specific student that are taught by the current teacher.
+   * This assumes a backend endpoint exists.
+   */
+  async getStudentClasses(studentId: string) {
+    const response = await authenticatedFetch(`/teacher/student/${studentId}/classes`);
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to load student classes: ${error}`);
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Add or update a comment for a student in a class.
+   */
+  async upsertComment(data: {
     student_id: string
     class_id: string
     comment_text: string
@@ -172,16 +202,55 @@ export const teacherApi = {
     engagement_rating?: number
   }) {
     const response = await authenticatedFetch('/teacher/comment', {
-      method: 'POST',
+      method: 'POST', // Stays POST as per backend route
       body: JSON.stringify(data),
     })
 
     if (!response.ok) {
       const error = await response.text()
-      throw new Error(`Failed to add comment: ${error}`)
+      throw new Error(`Failed to save comment: ${error}`)
     }
 
     return response.json()
+  },
+
+  /**
+   * Get a teacher's comment for a student in a specific class.
+   */
+  async getComment(studentId: string, classId: string) {
+    const response = await authenticatedFetch(`/teacher/student/${studentId}/class/${classId}/comment`);
+    
+    // A 404 from the gateway would be an error, but the endpoint should return 200 with null body if not found.
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to load comment: ${error}`);
+    }
+    
+    // Handle cases where the response body is empty (comment doesn't exist)
+    const text = await response.text();
+    try {
+      return text ? JSON.parse(text) : null;
+    } catch (e) {
+      // If parsing fails on a non-empty string, it's an issue.
+      console.error("Failed to parse getComment response:", text);
+      return null;
+    }
+  },
+
+  /**
+   * Delete a teacher's comment for a student in a specific class.
+   */
+  async deleteComment(studentId: string, classId: string) {
+    const response = await authenticatedFetch(`/teacher/student/${studentId}/class/${classId}/comment`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to delete comment: ${error}`);
+    }
+
+    return response.json();
   },
 }
 
