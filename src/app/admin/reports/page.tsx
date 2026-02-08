@@ -88,19 +88,17 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-4">
+          <div>
             <button
               onClick={() => router.push('/admin')}
-              className="p-2 hover:bg-violet-50 rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer mb-3"
             >
-              <ArrowLeft className="w-5 h-5 text-violet-600" />
+              <ArrowLeft className="w-4 h-4" /> Back
             </button>
-            <div>
-              <h1 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
-                Reports & Analytics
-              </h1>
-              <p className="text-gray-600 mt-1">Career recommendations and class summaries</p>
-            </div>
+            <h1 className="text-2xl font-bold text-emerald-800">
+              Reports & Analytics
+            </h1>
+            <p className="text-gray-600 mt-1">Career recommendations and class summaries</p>
           </div>
         </div>
       </div>

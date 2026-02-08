@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { requireRole } from "@/lib/auth/roleCheck"
 import { adminApi } from "@/lib/api"
+import { ArrowLeft } from "lucide-react"
 import LogoutButton from "@/components/auth/LogoutButton"
 
 interface Subject {
@@ -83,17 +84,12 @@ export default function ManageSubjectsPage() {
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
         {/* Back button */}
-        <div>
-          <button
-            onClick={() => router.push('/admin/')}
-            className="cursor-pointer flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-            Back to Dashboard
-          </button>
-        </div>
+        <button
+          onClick={() => router.push('/admin/')}
+          className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
 
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-sm p-8 border border-violet-100">

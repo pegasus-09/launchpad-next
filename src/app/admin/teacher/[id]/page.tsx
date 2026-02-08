@@ -352,7 +352,9 @@ export default function TeacherDetailPage() {
                     >
                       All
                     </button>
-                    {data.classes.map((cls) => (
+                    {data.classes
+                      .filter((cls) => data.students.some((s) => s.class_ids?.includes(cls.id)))
+                      .map((cls) => (
                       <button
                         key={cls.id}
                         onClick={() => setActiveClassId(cls.id)}

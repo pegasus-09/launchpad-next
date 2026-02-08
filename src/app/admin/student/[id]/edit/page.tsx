@@ -171,10 +171,9 @@ export default function EditStudentPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button
           onClick={() => router.push(`/admin/student/${studentId}`)}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6"
+          className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer mb-6"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Student
+          <ArrowLeft className="w-4 h-4" /> Back
         </button>
 
         <div className="bg-white rounded-2xl shadow-sm border border-violet-100 p-8">
