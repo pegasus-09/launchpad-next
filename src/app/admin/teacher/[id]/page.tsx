@@ -144,19 +144,17 @@ export default function TeacherDetailPage() {
       <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div>
               <button
                 onClick={() => router.push('/admin/teacher')}
-                className="p-2 hover:bg-violet-50 rounded-lg transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer mb-3"
               >
-                <ArrowLeft className="w-5 h-5 text-violet-600" />
+                <ArrowLeft className="w-4 h-4" /> Back
               </button>
-              <div>
-                <h1 className="text-2xl font-bold text-emerald-800">
-                  {data.teacher.full_name}
-                </h1>
-                <p className="text-gray-600">{data.teacher.email}</p>
-              </div>
+              <h1 className="text-2xl font-bold text-emerald-800">
+                {data.teacher.full_name}
+              </h1>
+              <p className="text-gray-600">{data.teacher.email}</p>
             </div>
             
             <div className="flex gap-2">
@@ -226,7 +224,7 @@ export default function TeacherDetailPage() {
                       type="text"
                       value={editForm.full_name}
                       onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                     />
                   </div>
                   <div>
@@ -237,7 +235,7 @@ export default function TeacherDetailPage() {
                       type="email"
                       value={editForm.email}
                       onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -256,7 +254,7 @@ export default function TeacherDetailPage() {
             </div>
 
             {/* Stats */}
-            <div className="bg-white rounded-lg shadow p-6 mt-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-6 mt-6 border border-gray-100">
               <h2 className="text-lg font-semibold mb-4">Statistics</h2>
               <div className="space-y-3">
                 <div className="flex justify-between">
@@ -278,7 +276,7 @@ export default function TeacherDetailPage() {
           {/* Classes and Subjects */}
           <div className="lg:col-span-2 space-y-6">
             {/* Subjects Taught */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-teal-100">
               <h2 className="text-lg font-semibold mb-4">Subjects Taught</h2>
               {data.subjects.length === 0 ? (
                 <p className="text-gray-500">No subjects assigned</p>
@@ -287,12 +285,9 @@ export default function TeacherDetailPage() {
                   {data.subjects.map((subject) => (
                     <span
                       key={subject.id}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-100 text-teal-800"
                     >
                       {subject.name}
-                      {subject.category && (
-                        <span className="ml-2 text-blue-600">• {subject.category}</span>
-                      )}
                     </span>
                   ))}
                 </div>
@@ -300,12 +295,12 @@ export default function TeacherDetailPage() {
             </div>
 
             {/* Classes */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-violet-100">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">Classes</h2>
                 <button
                   onClick={() => setShowClassModal(true)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-black text-white text-sm rounded-lg hover:bg-gray-900 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-black text-white text-sm rounded-lg hover:bg-gray-800 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   Add Class
@@ -342,7 +337,7 @@ export default function TeacherDetailPage() {
             </div>
 
             {/* Students */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-gray-100">
               <div className="flex flex-col gap-3 mb-4">
                 <h2 className="text-lg font-semibold">Students</h2>
                 {data.classes.length > 0 && (
@@ -351,8 +346,8 @@ export default function TeacherDetailPage() {
                       onClick={() => setActiveClassId('all')}
                       className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
                         activeClassId === 'all'
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                          ? 'bg-violet-600 text-white border-violet-600'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-violet-300'
                       }`}
                     >
                       All
@@ -363,8 +358,8 @@ export default function TeacherDetailPage() {
                         onClick={() => setActiveClassId(cls.id)}
                         className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
                           activeClassId === cls.id
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                            ? 'bg-violet-600 text-white border-violet-600'
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-violet-300'
                         }`}
                       >
                         {cls.class_name}
@@ -381,7 +376,7 @@ export default function TeacherDetailPage() {
                   {studentsByClass.map((student) => (
                     <div
                       key={student.id}
-                      className="p-3 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors cursor-pointer"
+                      className="p-3 border border-gray-200 rounded-lg hover:border-violet-300 transition-colors cursor-pointer"
                       onClick={() => router.push(`/admin/student/${student.id}`)}
                     >
                       <div className="flex items-center justify-between">
@@ -394,7 +389,7 @@ export default function TeacherDetailPage() {
                             student.class_names.map((name, idx) => (
                               <span
                                 key={`${student.id}-class-${idx}`}
-                                className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
+                                className="px-2 py-1 bg-violet-100 text-violet-700 text-xs rounded"
                               >
                                 {name}
                               </span>
@@ -458,7 +453,7 @@ export default function TeacherDetailPage() {
               </button>
               <button
                 onClick={() => router.push('/admin/classes')}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
               >
                 Go to Classes
               </button>

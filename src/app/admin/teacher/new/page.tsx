@@ -138,7 +138,7 @@ export default function NewTeacherPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="cursor-pointer flex-1 px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
+                className="cursor-pointer flex-1 px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
               >
                 {loading ? 'Adding...' : 'Add Teacher'}
               </button>

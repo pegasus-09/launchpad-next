@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { adminApi, authApi } from '@/lib/api'
 import { Users, GraduationCap, BookOpen, ClipboardCheck } from 'lucide-react'
 import LogoutButton from '@/components/auth/LogoutButton'
+import Logo from '@/components/ui/Logo'
 import { requireRole } from '@/lib/auth/roleCheck'
 
 interface Stats {
@@ -67,24 +69,34 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
-              Admin Dashboard
-            </h1>
-            <p className="text-gray-600 mt-1">Manage your school&apos;s career guidance system</p>
-            <p className="text-sm text-gray-500 mt-2">
-              <span className="text-emerald-800 font-semibold">{adminName ? adminName : 'Admin'}</span>
-              {schoolName ? <span> • {schoolName}</span> : ''}
-            </p>
+      <div className="bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-start justify-between gap-4">
+          <div className="flex flex-col">
+            <div className="flex flex-row items-center space-x-2">
+              <Link href="/admin">
+                <Logo size="lg" variant="dark" />
+              </Link>
+              {schoolName && (
+                <>
+                  <span className="text-white text-xl">|</span>
+                  <p className="text-gray-300 mt-1.5">{schoolName}</p>
+                </>
+              )}
+            </div>
+            <span className="text-md text-gray-500 mt-6">Welcome,</span>
+            <h1 className="text-white text-3xl mt-1">{adminName ? adminName : 'Admin'}</h1>
           </div>
-          <LogoutButton variant="light" />
+          <LogoutButton variant="dark" />
         </div>
       </div>
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-400">Admin Dashboard</h2>
+          <p className="text-sm text-gray-400 mt-1">Manage your school&apos;s career guidance platform</p>
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Students */}

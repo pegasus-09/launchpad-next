@@ -140,6 +140,76 @@ export const studentApi = {
 
     return response.json()
   },
+
+  async getPortfolio() {
+    const response = await authenticatedFetch('/student/portfolio')
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load portfolio: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async searchCareers(query: string) {
+    const response = await authenticatedFetch(`/careers/search?q=${encodeURIComponent(query)}`)
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to search careers: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async getCareerAspirations() {
+    const response = await authenticatedFetch('/student/career-aspirations')
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load career aspirations: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async saveCareerAspirations(socCodes: string[]) {
+    const response = await authenticatedFetch('/student/career-aspirations', {
+      method: 'PUT',
+      body: JSON.stringify({ soc_codes: socCodes }),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to save career aspirations: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async savePortfolio(data: {
+    summary?: string
+    year_level?: string
+    subjects?: Array<{ name: string; category?: string; source?: string }>
+    work_experience?: Array<{ title: string; organisation: string; description?: string; start_date?: string; end_date?: string; source?: string }>
+    certifications?: Array<{ name: string; issuer?: string; date?: string }>
+    volunteering?: Array<{ title: string; organisation: string; description?: string }>
+    extracurriculars?: Array<{ name: string; role?: string; description?: string }>
+    skills?: string[]
+  }) {
+    const response = await authenticatedFetch('/student/portfolio', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to save portfolio: ${error}`)
+    }
+
+    return response.json()
+  },
 }
 
 // ============================================================================
@@ -156,6 +226,20 @@ export const teacherApi = {
     if (!response.ok) {
       const error = await response.text()
       throw new Error(`Failed to load students: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Get all classes the teacher teaches
+   */
+  async getClasses() {
+    const response = await authenticatedFetch('/teacher/classes')
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load classes: ${error}`)
     }
 
     return response.json()
@@ -541,6 +625,74 @@ export const adminApi = {
     if (!response.ok) {
       const error = await response.text()
       throw new Error(`Failed to load reports: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  // ========================================================================
+  // STUDENT PORTFOLIO (admin view)
+  // ========================================================================
+
+  async getStudentCareerAspirations(studentId: string) {
+    const response = await authenticatedFetch(`/admin/student/${studentId}/career-aspirations`)
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load career aspirations: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async getStudentPortfolio(studentId: string) {
+    const response = await authenticatedFetch(`/admin/student/${studentId}/portfolio`)
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load portfolio: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  // ========================================================================
+  // ADMIN NOTES
+  // ========================================================================
+
+  async getStudentNotes(studentId: string) {
+    const response = await authenticatedFetch(`/admin/student/${studentId}/notes`)
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load notes: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async addStudentNote(studentId: string, noteText: string) {
+    const response = await authenticatedFetch(`/admin/student/${studentId}/note`, {
+      method: 'POST',
+      body: JSON.stringify({ note_text: noteText }),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to add note: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async deleteStudentNote(studentId: string, noteId: string) {
+    const response = await authenticatedFetch(`/admin/student/${studentId}/note/${noteId}`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to delete note: ${error}`)
     }
 
     return response.json()

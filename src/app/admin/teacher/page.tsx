@@ -120,7 +120,7 @@ export default function TeachersPage() {
             </div>
             <button
               onClick={() => router.push('/admin/teacher/new')}
-              className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
             >
               <UserPlus className="w-4 h-4" />
               Add Teacher

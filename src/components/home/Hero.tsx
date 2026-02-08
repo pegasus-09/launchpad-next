@@ -16,10 +16,10 @@ export default function Hero() {
         </p>
 
         <div className="mt-10 flex justify-center gap-4">
-          <Link href="/login" className="rounded-xl bg-violet-600 px-8 py-3 font-medium text-white hover:bg-violet-700 cursor-pointer transition-colors shadow-lg shadow-violet-200">
+          <Link href="/login" className="inline-flex items-center justify-center rounded-xl bg-violet-600 px-8 py-3 font-medium text-white hover:bg-violet-700 cursor-pointer transition-colors shadow-lg shadow-violet-200">
             Get started
           </Link>
-          <Link href="#features" className="rounded-xl border-2 border-teal-400 px-8 py-3 font-medium text-teal-600 hover:bg-teal-50 cursor-pointer transition-colors">
+          <Link href="#features" className="inline-flex items-center justify-center rounded-xl border-2 border-teal-400 px-8 py-3 font-medium text-teal-600 hover:bg-teal-50 cursor-pointer transition-colors">
             Learn more
           </Link>
         </div>

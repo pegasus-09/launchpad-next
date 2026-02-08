@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="py-8 text-center bg-gray-900">
+    <footer className="py-8 text-center bg-gray-800">
       <div className="text-2xl font-mono font-bold">
         <span className="text-violet-400">launch</span>
         <span className="text-teal-400">pad</span>

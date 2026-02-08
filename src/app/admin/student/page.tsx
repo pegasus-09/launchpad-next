@@ -128,27 +128,25 @@ export default function StudentsPage() {
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-6">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
+            <div>
               <button
                 onClick={() => router.push('/admin')}
-                className="p-2 hover:bg-violet-50 rounded-lg transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer mb-3"
               >
-                <ArrowLeft className="w-5 h-5 text-violet-600" />
+                <ArrowLeft className="w-4 h-4" /> Back
               </button>
-              <div>
-                <h1 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-teal-600 bg-clip-text text-transparent">
-                  Students
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  {students.length} student{students.length !== 1 ? 's' : ''} in your school
-                </p>
-              </div>
+              <h1 className="text-2xl font-bold text-emerald-800">
+                Students
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {students.length} student{students.length !== 1 ? 's' : ''} in your school
+              </p>
             </div>
             <button
               onClick={() => router.push('/admin/student/new')}
-              className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
             >
               <UserPlus className="w-4 h-4" />
               Add Student
@@ -158,7 +156,7 @@ export default function StudentsPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-8">
         {/* Search */}
         <div className="mb-6">
           <div className="relative">

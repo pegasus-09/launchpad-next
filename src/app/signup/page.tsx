@@ -45,7 +45,7 @@ function SignupContent() {
     }
 
     if (data.session) {
-      router.push("/assessment")
+      router.push("/student/assessment")
     }
 
     setLoading(false);

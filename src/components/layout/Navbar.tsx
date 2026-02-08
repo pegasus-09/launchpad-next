@@ -58,7 +58,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="w-full border-b border-gray-800 bg-gray-900 text-white">
+    <header className="w-full border-b border-gray-800 bg-gray-800 text-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo with back button */}
         <div className="flex items-center gap-4">
