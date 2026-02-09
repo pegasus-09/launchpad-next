@@ -45,7 +45,7 @@ export default function AddStudentPage() {
         throw new Error('Not authenticated')
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/new`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/add-student`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
