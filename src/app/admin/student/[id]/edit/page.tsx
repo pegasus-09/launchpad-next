@@ -288,7 +288,7 @@ export default function EditStudentPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-2 bg-linear-to-r from-violet-600 to-teal-600 text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-60"
+              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>

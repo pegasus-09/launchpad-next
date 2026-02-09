@@ -261,21 +261,6 @@ export const teacherApi = {
   },
 
   /**
-   * Get classes for a specific student that are taught by the current teacher.
-   * This assumes a backend endpoint exists.
-   */
-  async getStudentClasses(studentId: string) {
-    const response = await authenticatedFetch(`/teacher/student/${studentId}/classes`);
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Failed to load student classes: ${error}`);
-    }
-
-    return response.json();
-  },
-
-  /**
    * Add or update a comment for a student in a class.
    */
   async upsertComment(data: {
