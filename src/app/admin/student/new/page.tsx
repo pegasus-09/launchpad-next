@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { requireRole } from "@/lib/auth/roleCheck"
+import LogoutButton from '@/components/auth/LogoutButton'
 import { createClient } from "@/lib/supabase/client"
 
 export default function AddStudentPage() {
@@ -84,23 +85,26 @@ export default function AddStudentPage() {
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div>
-            <button
-              onClick={() => router.push('/admin/student')}
-              className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer mb-3"
-            >
-              <ArrowLeft className="w-4 h-4" /> Back
-            </button>
-            <h1 className="text-2xl font-bold text-emerald-800">
-              Add Student
-            </h1>
-            <p className="text-gray-600 mt-1">Create a new student account</p>
+        <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 py-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <button
+                onClick={() => router.push('/admin/student')}
+                className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer mb-3"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+              <h1 className="text-2xl font-bold text-emerald-800">
+                Add Student
+              </h1>
+              <p className="text-gray-600 mt-1">Create a new student account</p>
+            </div>
+            <LogoutButton />
           </div>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 py-8">
         <div className="bg-white rounded-2xl shadow-sm p-8 border border-violet-100">
           {error && (
             <div className="mb-6 p-4 bg-rose-700/10 border border-rose-700/30 rounded-lg">

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
 import { ArrowLeft, Plus, Search } from 'lucide-react'
 import { HARD_CODED_SUBJECTS } from '@/lib/subjects'
+import LogoutButton from '@/components/auth/LogoutButton'
 
 interface Subject {
   id: string
@@ -191,24 +192,27 @@ export default function CreateClassPage() {
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div>
-            <button
-              onClick={() => router.push('/admin/classes')}
-              className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer mb-3"
-            >
-              <ArrowLeft className="w-4 h-4" /> Back
-            </button>
-            <h1 className="text-2xl font-bold text-emerald-800">
-              Create New Class
-            </h1>
-            <p className="text-gray-600 mt-1">Set up a new class for your school</p>
+        <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 py-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <button
+                onClick={() => router.push('/admin/classes')}
+                className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer mb-3"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+              <h1 className="text-2xl font-bold text-emerald-800">
+                Create New Class
+              </h1>
+              <p className="text-gray-600 mt-1">Set up a new class for your school</p>
+            </div>
+            <LogoutButton />
           </div>
         </div>
       </div>
 
       {/* Form */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16 py-8">
         <div className="bg-white rounded-2xl shadow-sm border border-violet-100 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Class Name */}

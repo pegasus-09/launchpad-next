@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
 import { ArrowLeft, Edit2, Trash2, Save, X, Plus } from 'lucide-react'
+import LogoutButton from '@/components/auth/LogoutButton'
 
 interface Teacher {
   id: string
@@ -157,7 +158,8 @@ export default function TeacherDetailPage() {
               <p className="text-gray-600">{data.teacher.email}</p>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <LogoutButton />
               {!isEditing ? (
                 <>
                   <button

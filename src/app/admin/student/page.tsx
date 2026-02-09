@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
 import { ArrowLeft, Search, CheckCircle, XCircle, Clock, MoreVertical, Pencil, Trash2, UserPlus } from 'lucide-react'
+import LogoutButton from '@/components/auth/LogoutButton'
 
 interface Student {
   id: string
@@ -127,37 +128,40 @@ export default function StudentsPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
+      <div className="bg-gray-800">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-6">
           <div className="flex items-center justify-between gap-4">
             <div>
               <button
                 onClick={() => router.push('/admin')}
-                className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer mb-3"
+                className="inline-flex items-center gap-1.5 text-sm text-violet-400 hover:text-violet-300 transition-colors font-medium cursor-pointer mb-3"
               >
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
-              <h1 className="text-2xl font-bold text-emerald-800">
+              <h1 className="text-2xl font-bold text-white">
                 Students
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-400 mt-1">
                 {students.length} student{students.length !== 1 ? 's' : ''} in your school
               </p>
             </div>
-            <button
-              onClick={() => router.push('/admin/student/new')}
-              className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <UserPlus className="w-4 h-4" />
-              Add Student
-            </button>
+            <LogoutButton variant="dark" />
           </div>
         </div>
       </div>
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-8">
-        {/* Search */}
+        {/* Action + Search */}
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <button
+            onClick={() => router.push('/admin/student/new')}
+            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+          >
+            <UserPlus className="w-4 h-4" />
+            Add Student
+          </button>
+        </div>
         <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
 import { ArrowLeft, Search, Save, Trash2 } from 'lucide-react'
+import LogoutButton from '@/components/auth/LogoutButton'
 import { HARD_CODED_SUBJECTS } from '@/lib/subjects'
 
 interface Subject {
@@ -261,13 +262,16 @@ export default function EditClassPage() {
               </h1>
               <p className="text-gray-600 mt-1">Update class details and roster</p>
             </div>
-            <button
-              onClick={handleDelete}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-rose-700 border border-rose-700 rounded-lg hover:bg-rose-700/10"
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete Class
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleDelete}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-rose-700 border border-rose-700 rounded-lg hover:bg-rose-700/10"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Class
+              </button>
+              <LogoutButton />
+            </div>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
 import { ArrowLeft, Users, BookOpen, TrendingUp } from 'lucide-react'
+import LogoutButton from '@/components/auth/LogoutButton'
 
 interface TopCareer {
   soc_code: string
@@ -86,19 +87,22 @@ export default function ReportsPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-violet-100">
+      <div className="bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div>
-            <button
-              onClick={() => router.push('/admin')}
-              className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer mb-3"
-            >
-              <ArrowLeft className="w-4 h-4" /> Back
-            </button>
-            <h1 className="text-2xl font-bold text-emerald-800">
-              Reports & Analytics
-            </h1>
-            <p className="text-gray-600 mt-1">Career recommendations and class summaries</p>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <button
+                onClick={() => router.push('/admin')}
+                className="inline-flex items-center gap-1.5 text-sm text-violet-400 hover:text-violet-300 transition-colors font-medium cursor-pointer mb-3"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+              <h1 className="text-2xl font-bold text-white">
+                Reports & Analytics
+              </h1>
+              <p className="text-gray-400 mt-1">Career recommendations and class summaries</p>
+            </div>
+            <LogoutButton variant="dark" />
           </div>
         </div>
       </div>

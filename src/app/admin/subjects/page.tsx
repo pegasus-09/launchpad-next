@@ -82,32 +82,35 @@ export default function ManageSubjectsPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Back button */}
-        <button
-          onClick={() => router.push('/admin/')}
-          className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
-
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-sm p-8 border border-violet-100">
-          <div className="flex items-start justify-between">
+      {/* Header */}
+      <div className="bg-gray-800">
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-6">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Manage Subjects</h1>
-              <p className="text-gray-600">Create and manage subject offerings for your school</p>
-            </div>
-            <div className="flex gap-3">
               <button
-                className="cursor-pointer px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors font-medium"
+                onClick={() => router.push('/admin/')}
+                className="inline-flex items-center gap-1.5 text-sm text-violet-400 hover:text-violet-300 transition-colors font-medium cursor-pointer mb-3"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+              <h1 className="text-2xl font-bold text-white">
+                Manage Subjects
+              </h1>
+              <p className="text-gray-400 mt-1">Create and manage subject offerings for your school</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                className="cursor-pointer px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors font-medium"
               >
                 + Add Subject
               </button>
-              <LogoutButton />
+              <LogoutButton variant="dark" />
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-8 space-y-8">
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

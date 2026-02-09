@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { adminApi } from "@/lib/api"
 import { requireRole } from "@/lib/auth/roleCheck"
 import { ArrowLeft, Search } from "lucide-react"
+import LogoutButton from '@/components/auth/LogoutButton'
 
 interface ClassOption {
   id: string
@@ -169,12 +170,15 @@ export default function EditStudentPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <button
-          onClick={() => router.push(`/admin/student/${studentId}`)}
-          className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => router.push(`/admin/student/${studentId}`)}
+            className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+          <LogoutButton />
+        </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-violet-100 p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Student</h1>

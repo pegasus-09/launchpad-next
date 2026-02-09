@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import { normaliseRankingScore } from "@/lib/normalise"
 import { adminApi } from "@/lib/api"
 import { Pencil, Trash2, ClipboardCheck, MessageSquare, BookOpen, FileText, Download, StickyNote, X, Eye, Briefcase, ArrowLeft } from "lucide-react"
+import LogoutButton from '@/components/auth/LogoutButton'
 
 interface StudentProfile {
   id: string
@@ -352,13 +353,16 @@ export default function StudentDetailsPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       <div className="max-w-6xl mx-auto p-6 space-y-6">
-        {/* Back Button */}
-        <button
-          onClick={() => router.push('/admin/student')}
-          className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
+        {/* Back Button + Logout */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => router.push('/admin/student')}
+            className="inline-flex items-center gap-1.5 text-sm text-violet-600 hover:text-violet-800 transition-colors font-medium cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+          <LogoutButton />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)] gap-6">
           {/* Sidebar */}
