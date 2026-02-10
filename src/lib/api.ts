@@ -210,6 +210,41 @@ export const studentApi = {
 
     return response.json()
   },
+
+  async getTeacherStatus() {
+    const response = await authenticatedFetch('/student/teacher-status')
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load teacher status: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async triggerAnalysis() {
+    const response = await authenticatedFetch('/student/analysis', {
+      method: 'POST',
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to trigger analysis: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async getAnalysis() {
+    const response = await authenticatedFetch('/student/analysis')
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load analysis: ${error}`)
+    }
+
+    return response.json()
+  },
 }
 
 // ============================================================================
