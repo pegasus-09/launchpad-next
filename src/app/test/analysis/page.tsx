@@ -972,7 +972,7 @@ export default function AnalysisTestPage() {
   const [subjects, setSubjects] = useState<SubjectEnrolment[]>([...DEFAULT_SUBJECTS]);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [apiUrl, setApiUrl] = useState("http://localhost:8000");
+  const [apiUrl, setApiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const setPreset = (name: string) => setAnswers({ ...PRESETS[name] });
