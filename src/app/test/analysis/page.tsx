@@ -973,6 +973,7 @@ export default function AnalysisTestPage() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [apiUrl, setApiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
+  const [debugLog, setDebugLog] = useState<string[]>([]);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const setPreset = (name: string) => setAnswers({ ...PRESETS[name] });
@@ -1003,31 +1004,43 @@ export default function AnalysisTestPage() {
   const runAnalysis = useCallback(async () => {
     setLoading(true);
     setResult(null);
+    const log: string[] = [];
     const url = `${apiUrl}/test/analysis`;
     const payload = {
       answers,
       teacher_comments: comments.filter(c => c.comment_text.trim()),
       subject_enrolments: subjects.filter(s => s.subject_name.trim()),
     };
-    console.log("[Analysis] POST", url);
-    console.log("[Analysis] Payload:", JSON.stringify(payload, null, 2));
+    log.push(`POST ${url}`);
+    log.push(`Payload keys: ${Object.keys(payload).join(", ")}`);
+    log.push(`Answers: ${Object.keys(answers).length} dimensions`);
+    log.push(`Comments: ${payload.teacher_comments.length}`);
+    log.push(`Subjects: ${payload.subject_enrolments.length}`);
     try {
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      console.log("[Analysis] Response status:", res.status, res.statusText);
-      console.log("[Analysis] Response headers:", Object.fromEntries(res.headers.entries()));
-      const data = await res.json();
-      console.log("[Analysis] Response body:", JSON.stringify(data, null, 2));
-      setResult(data);
+      log.push(`Status: ${res.status} ${res.statusText}`);
+      log.push(`Content-Type: ${res.headers.get("content-type") || "n/a"}`);
+      log.push(`Server: ${res.headers.get("server") || "n/a"}`);
+      const text = await res.text();
+      log.push(`Response body: ${text.slice(0, 500)}`);
+      try {
+        const data = JSON.parse(text);
+        setResult(data);
+      } catch {
+        setResult({ error: `Non-JSON response: ${text.slice(0, 200)}` });
+      }
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch (err) {
-      console.error("[Analysis] Fetch error:", err);
-      setResult({ error: err instanceof Error ? err.message : String(err) });
+      const msg = err instanceof Error ? err.message : String(err);
+      log.push(`Fetch error: ${msg}`);
+      setResult({ error: msg });
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     }
+    setDebugLog(log);
     setLoading(false);
   }, [answers, comments, subjects, apiUrl]);
 
@@ -1238,6 +1251,18 @@ export default function AnalysisTestPage() {
         >
           {loading ? "Running AI Analysis..." : "Run Full AI Analysis"}
         </button>
+
+        {/* Debug Log */}
+        {debugLog.length > 0 && (
+          <div style={{ marginTop: 24, padding: 16, backgroundColor: "#1e1e1e", borderRadius: 8, fontFamily: "monospace", fontSize: 13, color: "#d4d4d4", whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
+            <div style={{ color: "#569cd6", fontWeight: 700, marginBottom: 8 }}>Debug Log</div>
+            {debugLog.map((line, i) => (
+              <div key={i} style={{ color: line.startsWith("Status:") && !line.includes("200") ? "#f44747" : line.startsWith("Fetch error") ? "#f44747" : "#d4d4d4", marginBottom: 2 }}>
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Results */}
         <div ref={resultsRef} />
