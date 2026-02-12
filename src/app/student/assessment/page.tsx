@@ -13,6 +13,7 @@ import { QUESTIONS } from "@/lib/assessmentQuestions"
 export default function AssessmentPage() {
   const router = useRouter()
 
+  const [showConfirm, setShowConfirm] = useState(true)
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [currentSection, setCurrentSection] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -155,6 +156,54 @@ export default function AssessmentPage() {
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mb-4"></div>
           <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Pre-assessment confirmation modal
+  if (showConfirm) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 max-w-md w-full text-center">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-violet-100 to-teal-100">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 256 256" className="text-violet-600">
+              <path fill="currentColor" d="M208 32H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16m0 176H48V48h160zm-32-64a8 8 0 0 1-8 8H88a8 8 0 0 1 0-16h80a8 8 0 0 1 8 8m0-32a8 8 0 0 1-8 8H88a8 8 0 0 1 0-16h80a8 8 0 0 1 8 8" />
+            </svg>
+          </div>
+
+          <h2 className="text-xl font-bold text-gray-900 mb-1">Ready to begin?</h2>
+          <p className="text-gray-500 text-sm mb-6">Career Assessment</p>
+
+          <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-600 text-sm font-semibold">28</span>
+              <span className="text-sm text-gray-700">Questions across 5 sections</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-teal-600 text-sm font-semibold">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24m0 192a88 88 0 1 1 88-88a88.1 88.1 0 0 1-88 88m64-88a8 8 0 0 1-8 8h-56a8 8 0 0 1-8-8V72a8 8 0 0 1 16 0v48h48a8 8 0 0 1 8 8" /></svg>
+              </span>
+              <span className="text-sm text-gray-700">About 5–10 minutes to complete</span>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => router.push("/student")}
+              className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-colors cursor-pointer text-sm"
+            >
+              Go back
+            </button>
+            <button
+              onClick={() => setShowConfirm(false)}
+              className="flex-1 px-4 py-2.5 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-700 transition-colors cursor-pointer text-sm"
+            >
+              Start assessment
+            </button>
+          </div>
+
+          <p className="mt-4 text-xs text-gray-400">Your progress is not saved until you submit.</p>
         </div>
       </div>
     )

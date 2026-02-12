@@ -35,16 +35,19 @@ export default function Features() {
             icon={<TargetIcon />}
             title="Psychometric Assessment"
             description="A comprehensive questionnaire evaluating aptitudes, interests, personality traits, values, and work style preferences."
+            index={0}
           />
           <FeatureCard
             icon={<ChartLineUpIcon />}
             title="Personalised Career Matches"
             description="Ranked career recommendations based on deterministic matching algorithms that analyse each student's unique profile."
+            index={1}
           />
           <FeatureCard
             icon={<FileTextIcon />}
             title="Portfolio Builder"
             description="Students create professional portfolios highlighting projects, strengths, and experiences — exportable as PDF."
+            index={2}
           />
         </div>
       </div>
