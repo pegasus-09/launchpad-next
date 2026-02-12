@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { studentApi } from "@/lib/api"
 import { createClient } from "@/lib/supabase/client"
+import FollowUpQuestions, { type FollowUpQuestion, type FollowUpAnswer } from "@/components/FollowUpQuestions"
 
 // Import your assessment questions
 // Adjust this path to match your actual file location
@@ -17,6 +18,9 @@ export default function AssessmentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+
+  // Follow-up state
+  const [followUpQuestions, setFollowUpQuestions] = useState<FollowUpQuestion[] | null>(null)
 
   // Check authentication and role - only students can access this page
   useEffect(() => {
@@ -85,7 +89,22 @@ export default function AssessmentPage() {
     setError(null)
 
     try {
+      // Submit the assessment
       await studentApi.submitAssessment(answers)
+
+      // Check if follow-up questions are needed
+      try {
+        const followUp = await studentApi.checkFollowUp(answers)
+        if (followUp.needs_follow_up && followUp.questions?.length > 0) {
+          setFollowUpQuestions(followUp.questions)
+          setIsSubmitting(false)
+          return
+        }
+      } catch {
+        // If follow-up check fails, proceed normally (graceful degradation)
+        console.warn('Follow-up check failed, proceeding to dashboard')
+      }
+
       router.push('/student')
     } catch (err: unknown) {
       console.error('Assessment submission error:', err)
@@ -93,6 +112,24 @@ export default function AssessmentPage() {
         setError(err.message || 'Failed to submit assessment')
       } else {
         setError('Failed to submit assessment')
+      }
+      setIsSubmitting(false)
+    }
+  }
+
+  async function handleFollowUpComplete(followUpAnswers: FollowUpAnswer[]) {
+    setIsSubmitting(true)
+    setError(null)
+
+    try {
+      await studentApi.submitFollowUp(followUpAnswers)
+      router.push('/student')
+    } catch (err: unknown) {
+      console.error('Follow-up submission error:', err)
+      if (err instanceof Error) {
+        setError(err.message || 'Failed to submit follow-up answers')
+      } else {
+        setError('Failed to submit follow-up answers')
       }
       setIsSubmitting(false)
     }
@@ -120,6 +157,25 @@ export default function AssessmentPage() {
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
+    )
+  }
+
+  // Show follow-up questions if needed
+  if (followUpQuestions) {
+    return (
+      <>
+        <FollowUpQuestions
+          questions={followUpQuestions}
+          onComplete={handleFollowUpComplete}
+        />
+        {error && (
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 max-w-md w-full px-4">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-red-800 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+      </>
     )
   }
 

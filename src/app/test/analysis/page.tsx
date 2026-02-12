@@ -976,6 +976,15 @@ export default function AnalysisTestPage() {
   const [debugLog, setDebugLog] = useState<string[]>([]);
   const resultsRef = useRef<HTMLDivElement>(null);
 
+  // Follow-up state
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [followUpQuestions, setFollowUpQuestions] = useState<any[] | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [followUpAnswers, setFollowUpAnswers] = useState<Record<string, string>>({});
+  const [followUpLoading, setFollowUpLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [followUpQuality, setFollowUpQuality] = useState<any>(null);
+
   const setPreset = (name: string) => setAnswers({ ...PRESETS[name] });
   const setScore = (id: DimensionKey, val: number) => setAnswers(prev => ({ ...prev, [id]: val }));
 
@@ -1001,15 +1010,49 @@ export default function AnalysisTestPage() {
   const updateSubject = (i: number, field: keyof SubjectEnrolment, val: string) => setSubjects(prev => prev.map((s, j) => j === i ? { ...s, [field]: val } : s));
   const removeSubject = (i: number) => setSubjects(prev => prev.filter((_, j) => j !== i));
 
+  const checkFollowUp = useCallback(async () => {
+    setFollowUpLoading(true);
+    setFollowUpQuestions(null);
+    setFollowUpAnswers({});
+    setFollowUpQuality(null);
+    try {
+      const res = await fetch(`${apiUrl}/test/follow-up-questions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers }),
+      });
+      const data = await res.json();
+      setFollowUpQuality(data.quality || null);
+      if (data.needs_follow_up && data.questions?.length) {
+        setFollowUpQuestions(data.questions);
+      } else {
+        setFollowUpQuestions([]);
+      }
+    } catch (err) {
+      console.error("Follow-up check failed:", err);
+      setFollowUpQuestions([]);
+    }
+    setFollowUpLoading(false);
+  }, [answers, apiUrl]);
+
   const runAnalysis = useCallback(async () => {
     setLoading(true);
     setResult(null);
     const log: string[] = [];
     const url = `${apiUrl}/test/analysis`;
+
+    // Build follow-up answers array if any were provided
+    const fuAnswersList = followUpQuestions?.length
+      ? followUpQuestions
+          .filter(q => followUpAnswers[q.id]?.trim())
+          .map(q => ({ id: q.id, question: q.text, answer: followUpAnswers[q.id] }))
+      : undefined;
+
     const payload = {
       answers,
       teacher_comments: comments.filter(c => c.comment_text.trim()),
       subject_enrolments: subjects.filter(s => s.subject_name.trim()),
+      ...(fuAnswersList?.length ? { follow_up_answers: fuAnswersList } : {}),
     };
     log.push(`POST ${url}`);
     log.push(`Payload keys: ${Object.keys(payload).join(", ")}`);
@@ -1042,20 +1085,27 @@ export default function AnalysisTestPage() {
     }
     setDebugLog(log);
     setLoading(false);
-  }, [answers, comments, subjects, apiUrl]);
+  }, [answers, comments, subjects, apiUrl, followUpQuestions, followUpAnswers]);
 
-  // Quality check preview
+  // Quality check preview (mirrors backend stdev-based thresholds)
   const values = Object.values(answers);
   const allSame = new Set(values).size === 1;
   const mostCommon = Math.max(...Object.values(values.reduce<Record<number, number>>((a, v) => ({ ...a, [v]: (a[v]||0)+1 }), {})));
   const straightLineRatio = mostCommon / values.length;
+  const mean = values.reduce((a, b) => a + b, 0) / values.length;
+  const stdDev = Math.sqrt(values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / (values.length - 1));
+  const distinctCount = new Set(values).size;
 
   const qualityInfo = allSame
-    ? { label: "Invalid — all identical", color: "bg-red-50 text-red-700 border-red-200" }
-    : straightLineRatio > 0.8
-    ? { label: "Low confidence — straight-lining detected", color: "bg-amber-50 text-amber-700 border-amber-200" }
-    : new Set(values).size <= 2
-    ? { label: "Medium confidence — limited differentiation", color: "bg-amber-50 text-amber-700 border-amber-200" }
+    ? { label: "Low — all identical (invalid)", color: "bg-red-50 text-red-700 border-red-200" }
+    : stdDev < 0.6
+    ? { label: "Low — stdev < 0.6", color: "bg-red-50 text-red-700 border-red-200" }
+    : straightLineRatio >= 0.45
+    ? { label: "Medium — 45%+ same value", color: "bg-amber-50 text-amber-700 border-amber-200" }
+    : distinctCount <= 3
+    ? { label: "Medium — ≤3 distinct values", color: "bg-amber-50 text-amber-700 border-amber-200" }
+    : stdDev < 0.9
+    ? { label: "Medium — stdev < 0.9", color: "bg-amber-50 text-amber-700 border-amber-200" }
     : { label: "High confidence", color: "bg-green-50 text-green-700 border-green-200" };
 
   return (
@@ -1228,6 +1278,87 @@ export default function AnalysisTestPage() {
           >
             + Add subject
           </button>
+        </Card>
+
+        {/* Follow-up Questions Section */}
+        <Card className="p-8">
+          <SectionTitle subtitle="Test follow-up question generation for ambiguous profiles">Follow-up Questions</SectionTitle>
+          <div className="space-y-4">
+            <button
+              onClick={checkFollowUp}
+              disabled={followUpLoading}
+              className="px-6 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors font-medium text-sm"
+            >
+              {followUpLoading ? "Checking..." : "Check Follow-up"}
+            </button>
+
+            {followUpQuality && (
+              <div className="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 font-mono">
+                Quality: {followUpQuality.confidence} | Flags: {followUpQuality.flags?.join(", ") || "none"} | Straight-line: {followUpQuality.straight_line_ratio} | Variance: {followUpQuality.variance}
+              </div>
+            )}
+
+            {followUpQuestions !== null && followUpQuestions.length === 0 && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+                <p className="text-green-700 text-sm font-medium">No follow-up needed — profile has sufficient differentiation.</p>
+              </div>
+            )}
+
+            {followUpQuestions && followUpQuestions.length > 0 && (
+              <div className="space-y-4">
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                  <p className="text-amber-700 text-sm font-medium">{followUpQuestions.length} follow-up question(s) generated</p>
+                </div>
+                {followUpQuestions.map((q, idx) => (
+                  <div key={q.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <p className="text-sm font-medium text-gray-900 mb-1">{idx + 1}. {q.text}</p>
+                    <p className="text-xs text-gray-400 mb-3">Type: {q.type} | Targets: {q.targets?.join(", ")}</p>
+                    {(q.type === "choice" || q.type === "scenario") && q.options?.length > 0 ? (
+                      <div className="space-y-1">
+                        {q.options.map((opt: string) => (
+                          <button
+                            key={opt}
+                            onClick={() => setFollowUpAnswers(prev => ({ ...prev, [q.id]: opt }))}
+                            className={`block w-full text-left px-3 py-2 rounded-lg border text-sm cursor-pointer transition-all ${
+                              followUpAnswers[q.id] === opt
+                                ? "border-violet-500 bg-violet-50 text-violet-900 font-medium"
+                                : "border-gray-200 text-gray-600 hover:border-violet-300"
+                            }`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    ) : q.type === "scale" ? (
+                      <div className="flex gap-2">
+                        {[1,2,3,4,5].map(v => (
+                          <button
+                            key={v}
+                            onClick={() => setFollowUpAnswers(prev => ({ ...prev, [q.id]: String(v) }))}
+                            className={`w-9 h-9 rounded-full border-2 text-sm font-medium cursor-pointer transition-all ${
+                              followUpAnswers[q.id] === String(v)
+                                ? "border-violet-600 bg-violet-600 text-white"
+                                : "border-gray-300 text-gray-400 hover:border-violet-400"
+                            }`}
+                          >
+                            {v}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        value={followUpAnswers[q.id] || ""}
+                        onChange={e => setFollowUpAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
+                        placeholder="Type your answer..."
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:border-violet-400 focus:outline-none"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </Card>
 
         {/* Run Button */}

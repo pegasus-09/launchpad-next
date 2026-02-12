@@ -245,6 +245,34 @@ export const studentApi = {
 
     return response.json()
   },
+
+  async checkFollowUp(answers: Record<string, number>) {
+    const response = await authenticatedFetch('/student/analysis/follow-up-questions', {
+      method: 'POST',
+      body: JSON.stringify({ answers }),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to check follow-up: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async submitFollowUp(followUpAnswers: { id: string; question: string; answer: string }[]) {
+    const response = await authenticatedFetch('/student/assessment/follow-up', {
+      method: 'POST',
+      body: JSON.stringify({ follow_up_answers: followUpAnswers }),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to submit follow-up: ${error}`)
+    }
+
+    return response.json()
+  },
 }
 
 // ============================================================================
