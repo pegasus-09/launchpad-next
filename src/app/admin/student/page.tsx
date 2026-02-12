@@ -186,7 +186,7 @@ export default function StudentsPage() {
               <div
                 key={student.id}
                 onClick={() => router.push(`/admin/student/${student.id}`)}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer overflow-hidden border border-violet-100 hover:border-violet-300"
+                className="bg-white rounded-lg shadow hover:shadow-lg transition-all cursor-pointer border border-violet-100 hover:border-violet-300"
               >
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-3 gap-3">
@@ -200,7 +200,6 @@ export default function StudentsPage() {
                       {(() => {
                         const status = getAssessmentStatus(student)
                         const StatusIcon = status.icon
-                        // TODO: Fix title formatting so its not cut off
                         return (
                           <div className="relative group">
                             <div

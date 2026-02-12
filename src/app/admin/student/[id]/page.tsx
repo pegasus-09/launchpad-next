@@ -69,6 +69,7 @@ export default function StudentDetailsPage() {
   const [newNote, setNewNote] = useState("")
   const [savingNote, setSavingNote] = useState(false)
   const [careerAspirations, setCareerAspirations] = useState<Array<{ id: string; soc_code: string; title: string }>>([])
+  const [strengthNarrative, setStrengthNarrative] = useState<string | null>(null)
 
 
   useEffect(() => {
@@ -131,6 +132,20 @@ export default function StudentDetailsPage() {
             setCareerAspirations(aspirationsData.aspirations || [])
           }
         } catch { /* no aspirations */ }
+
+        // Load AI analysis (for profile summary narrative)
+        try {
+          const analysisRes = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/student/${studentId}/analysis`,
+            { headers: { 'Authorization': `Bearer ${session.access_token}` } }
+          )
+          if (analysisRes.ok) {
+            const analysisData = await analysisRes.json()
+            if (isActive && analysisData.analysis?.strength_narrative) {
+              setStrengthNarrative(analysisData.analysis.strength_narrative)
+            }
+          }
+        } catch { /* no analysis yet */ }
       } catch (err: unknown) {
         if (controller.signal.aborted) {
           return
@@ -563,16 +578,21 @@ export default function StudentDetailsPage() {
             {hasAssessment && ranking.length > 0 && (
               <div id="career-matches" className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 scroll-mt-24">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Top Career Matches</h2>
-                <div className="mb-6 rounded-xl border border-violet-100 bg-violet-50/60 p-4">
-                  <h3 className="text-base font-semibold text-gray-900 mb-2">Why These Matches?</h3>
-                  <p className="text-sm text-gray-600">
-                    // TODO: Replace this explanation with real assessment-to-career reasoning data.
-                  </p>
-                  <p className="text-sm text-gray-600 mt-2">
-                    These matches are based on the student's assessment responses and highlight roles aligned with
-                    their interests, strengths, and work preferences.
-                  </p>
-                </div>
+                {strengthNarrative ? (
+                  <div className="mb-6 rounded-xl border border-violet-100 bg-violet-50/60 p-4">
+                    <h3 className="text-base font-semibold text-gray-900 mb-1">Profile Summary</h3>
+                    <p className="text-xs text-gray-400 mb-2">This is the narrative shown to the student on their dashboard.</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{strengthNarrative}</p>
+                  </div>
+                ) : (
+                  <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-4">
+                    <h3 className="text-base font-semibold text-gray-900 mb-2">Why These Matches?</h3>
+                    <p className="text-sm text-gray-500">
+                      These are preliminary matches based on the student&apos;s assessment scores.
+                      A personalised profile summary will appear here once the AI analysis has been run.
+                    </p>
+                  </div>
+                )}
                 <div className="space-y-3">
                   {ranking.slice(0, 5).map(([code, title, score], index) => (
                     <div

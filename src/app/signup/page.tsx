@@ -1,5 +1,5 @@
 "use client";
-// TODO: improve make the visual section on the side smaller
+
 import { useState, Suspense } from "react";
 import AuthLayout from "@/components/auth/AuthLayout";
 import { createClient } from "@/lib/supabase/client";
