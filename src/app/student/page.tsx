@@ -407,10 +407,10 @@ export default function StudentDashboard() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {analysis.strengths.map((s) => (
                           <div key={s.dimension} className="p-3 bg-violet-50 border border-violet-100 rounded-xl">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center justify-between gap-y-1">
                               <span className="font-medium text-violet-900 text-sm">{s.label}</span>
                               {s.teacher_confirmed && (
-                                <span className="text-xs bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded-full border border-teal-200">
+                                <span className="text-xs bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded-full border border-teal-200 whitespace-nowrap ml-auto">
                                   Teacher confirmed
                                 </span>
                               )}
@@ -434,9 +434,9 @@ export default function StudentDashboard() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {analysis.gaps.map((g) => (
                           <div key={g.dimension} className="p-3 bg-gray-50 border border-gray-200 rounded-xl">
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-wrap items-center justify-between gap-y-1">
                               <span className="font-medium text-gray-800 text-sm">{g.label}</span>
-                              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                              <span className={`text-xs px-1.5 py-0.5 rounded-full whitespace-nowrap ml-auto ${
                                 g.severity === 'significant' ? 'bg-red-100 text-red-700'
                                 : g.severity === 'moderate' ? 'bg-orange-100 text-orange-700'
                                 : 'bg-yellow-100 text-yellow-700'
