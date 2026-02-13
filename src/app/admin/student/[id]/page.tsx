@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/auth/roleCheck"
 import { createClient } from "@/lib/supabase/client"
 import { normaliseRankingScore } from "@/lib/normalise"
 import { adminApi } from "@/lib/api"
-import { Pencil, Trash2, ClipboardCheck, MessageSquare, BookOpen, FileText, Download, StickyNote, X, Eye, Briefcase, ArrowLeft } from "lucide-react"
+import { Pencil, Trash2, ClipboardCheck, MessageSquare, BookOpen, FileText, Download, StickyNote, X, Eye, Briefcase, ArrowLeft, RotateCcw } from "lucide-react"
 import LogoutButton from '@/components/auth/LogoutButton'
 
 interface StudentProfile {
@@ -50,6 +50,12 @@ interface StudentData {
     performance_rating?: number | null
     engagement_rating?: number | null
   }>
+  retake_request?: {
+    id: string
+    status: 'pending' | 'approved' | 'denied' | 'used'
+    requested_at: string
+    responded_at?: string
+  } | null
 }
 
 export default function StudentDetailsPage() {
@@ -70,7 +76,7 @@ export default function StudentDetailsPage() {
   const [savingNote, setSavingNote] = useState(false)
   const [careerAspirations, setCareerAspirations] = useState<Array<{ id: string; soc_code: string; title: string }>>([])
   const [strengthNarrative, setStrengthNarrative] = useState<string | null>(null)
-
+  const [retakeActionLoading, setRetakeActionLoading] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -174,12 +180,13 @@ export default function StudentDetailsPage() {
   }, [studentId])
 
   // Sidebar formatting
-  const sidebarItemClass = "block bg-white/15 rounded-xl shadow-sm p-3.5 border border-white/15 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-950/30 hover:border-white/20"
+  const sidebarItemClass = "flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors duration-150 hover:bg-white/15"
 
   useEffect(() => {
     const sectionIds = [
       "overview",
       "career-matches",
+      "retake-request",
       "assessment-status",
       "teacher-comments",
       "subjects-taken",
@@ -365,6 +372,28 @@ export default function StudentDetailsPage() {
     }
   }
 
+  async function handleRetakeAction(action: 'approve' | 'deny') {
+    if (!studentData?.retake_request) return
+    setRetakeActionLoading(true)
+    try {
+      const requestId = studentData.retake_request.id
+      if (action === 'approve') {
+        await adminApi.approveRetake(requestId)
+      } else {
+        await adminApi.denyRetake(requestId)
+      }
+      setStudentData(prev => prev ? {
+        ...prev,
+        retake_request: { ...prev.retake_request!, status: action === 'approve' ? 'approved' : 'denied', responded_at: new Date().toISOString() },
+      } : prev)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      alert(`Failed to ${action} retake: ${message}`)
+    } finally {
+      setRetakeActionLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50">
       <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -379,121 +408,42 @@ export default function StudentDetailsPage() {
           <LogoutButton />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[210px_minmax(0,1fr)] gap-6">
           {/* Sidebar */}
           <aside className="lg:sticky lg:top-6 h-fit">
-            <div className="space-y-3.5 rounded-2xl border border-slate-700/40 bg-slate-900/90 p-3 shadow-lg ring-1 ring-slate-800/40">
-              <div className="px-2 pt-1 text-[11px] tracking-[0.3em] text-slate-500 font-mono">
+            <nav className="space-y-1 rounded-2xl border border-slate-700/40 bg-slate-900/90 px-2 py-3 shadow-lg ring-1 ring-slate-800/40">
+              <div className="px-3 pb-2 text-[11px] tracking-[0.3em] text-slate-500 font-mono">
                 ON THIS PAGE
               </div>
-              {/* Career Matches */}
-              <a
-                href="#career-matches"
-                aria-current={activeSection === "career-matches" ? "page" : undefined}
-                className={`${sidebarItemClass} scroll-mt-24 ${
-                  activeSection === "career-matches" ? "bg-white/20 ring-1 ring-white/25" : ""
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2.5">
-                  <ClipboardCheck className="w-4.5 h-4.5 text-teal-200" />
-                  <h2 className="text-base font-semibold text-slate-50">Career Matches</h2>
-                </div>
-                <p className="text-sm text-slate-300">
-                  {hasAssessment && ranking.length > 0 ? `View matches.` : "No matches yet."}
-                </p>
+              <a href="#retake-request" className={`${sidebarItemClass} ${activeSection === "retake-request" ? "bg-white/20" : ""}`}>
+                <RotateCcw className="w-4 h-4 text-amber-300 shrink-0" />
+                <span className="text-sm font-medium text-slate-200">Retake Request</span>
               </a>
-
-              {/* Teacher Comments */}
-              <a
-                href="#teacher-comments"
-                aria-current={activeSection === "teacher-comments" ? "page" : undefined}
-                className={`${sidebarItemClass} scroll-mt-24 ${
-                  activeSection === "teacher-comments" ? "bg-white/20 ring-1 ring-white/25" : ""
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2.5">
-                  <MessageSquare className="w-4.5 h-4.5 text-violet-200" />
-                  <h2 className="text-base font-semibold text-slate-50">Teacher Comments</h2>
-                </div>
-                <p className="text-sm text-slate-300">
-                  {studentData.comments && studentData.comments.length > 0
-                    ? `${studentData.comments.length} comment${studentData.comments.length > 1 ? "s" : ""}`
-                    : "No comments yet."}
-                </p>
+              <a href="#career-matches" className={`${sidebarItemClass} ${activeSection === "career-matches" ? "bg-white/20" : ""}`}>
+                <ClipboardCheck className="w-4 h-4 text-teal-300 shrink-0" />
+                <span className="text-sm font-medium text-slate-200">Career Matches</span>
               </a>
-
-              {/* Subjects Taken */}
-              <a
-                href="#subjects-taken"
-                aria-current={activeSection === "subjects-taken" ? "page" : undefined}
-                className={`${sidebarItemClass} scroll-mt-24 ${
-                  activeSection === "subjects-taken" ? "bg-white/20 ring-1 ring-white/25" : ""
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2.5">
-                  <BookOpen className="w-4.5 h-4.5 text-teal-200" />
-                  <h2 className="text-base font-semibold text-slate-50">Subjects Taken</h2>
-                </div>
-                <p className="text-sm text-slate-300">
-                  {studentData.subjects && studentData.subjects.length > 0
-                    ? `${studentData.subjects.length} subject${studentData.subjects.length > 1 ? "s" : ""}`
-                    : "No subjects listed."}
-                </p>
+              <a href="#teacher-comments" className={`${sidebarItemClass} ${activeSection === "teacher-comments" ? "bg-white/20" : ""}`}>
+                <MessageSquare className="w-4 h-4 text-violet-300 shrink-0" />
+                <span className="text-sm font-medium text-slate-200">Teacher Comments</span>
               </a>
-
-              {/* Admin Notes */}
-              <a
-                href="#admin-notes"
-                aria-current={activeSection === "admin-notes" ? "page" : undefined}
-                className={`${sidebarItemClass} scroll-mt-24 ${
-                  activeSection === "admin-notes" ? "bg-white/20 ring-1 ring-white/25" : ""
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2.5">
-                  <StickyNote className="w-4.5 h-4.5 text-violet-200" />
-                  <h2 className="text-base font-semibold text-slate-50">Admin Notes</h2>
-                </div>
-                <p className="text-sm text-slate-300">
-                  {adminNotes.length > 0
-                    ? `${adminNotes.length} note${adminNotes.length > 1 ? "s" : ""}`
-                    : "No notes yet."}
-                </p>
+              <a href="#subjects-taken" className={`${sidebarItemClass} ${activeSection === "subjects-taken" ? "bg-white/20" : ""}`}>
+                <BookOpen className="w-4 h-4 text-teal-300 shrink-0" />
+                <span className="text-sm font-medium text-slate-200">Subjects</span>
               </a>
-
-              {/* Portfolio */}
-              <a
-                href="#portfolio"
-                aria-current={activeSection === "portfolio" ? "page" : undefined}
-                className={`${sidebarItemClass} scroll-mt-24 ${
-                  activeSection === "portfolio" ? "bg-white/20 ring-1 ring-white/25" : ""
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2.5">
-                  <FileText className="w-4.5 h-4.5 text-teal-200" />
-                  <h2 className="text-base font-semibold text-slate-50">Portfolio</h2>
-                </div>
-                <p className="text-sm text-slate-300">
-                  {hasPortfolio ? "Portfolio available." : "Not yet created."}
-                </p>
+              <a href="#admin-notes" className={`${sidebarItemClass} ${activeSection === "admin-notes" ? "bg-white/20" : ""}`}>
+                <StickyNote className="w-4 h-4 text-violet-300 shrink-0" />
+                <span className="text-sm font-medium text-slate-200">Admin Notes</span>
               </a>
-              <a
-                href="#career-aspiration"
-                aria-current={activeSection === "career-aspiration" ? "page" : undefined}
-                className={`${sidebarItemClass} scroll-mt-24 ${
-                  activeSection === "career-aspiration" ? "bg-white/20 ring-1 ring-white/25" : ""
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2.5">
-                  <Briefcase className="w-4.5 h-4.5 text-violet-200" />
-                  <h2 className="text-base font-semibold text-slate-50">Career Aspirations</h2>
-                </div>
-                <p className="text-sm text-slate-300">
-                  {careerAspirations.length > 0
-                    ? `${careerAspirations.length} career${careerAspirations.length > 1 ? "s" : ""} selected`
-                    : "No careers selected."}
-                </p>
+              <a href="#portfolio" className={`${sidebarItemClass} ${activeSection === "portfolio" ? "bg-white/20" : ""}`}>
+                <FileText className="w-4 h-4 text-teal-300 shrink-0" />
+                <span className="text-sm font-medium text-slate-200">Portfolio</span>
               </a>
-            </div>
+              <a href="#career-aspiration" className={`${sidebarItemClass} ${activeSection === "career-aspiration" ? "bg-white/20" : ""}`}>
+                <Briefcase className="w-4 h-4 text-violet-300 shrink-0" />
+                <span className="text-sm font-medium text-slate-200">Career Aspirations</span>
+              </a>
+            </nav>
           </aside>
 
           <div className="space-y-6">
@@ -570,6 +520,78 @@ export default function StudentDetailsPage() {
                     <p className="font-medium text-teal-900">Assessment Completed</p>
                     
                   </div>
+                </div>
+              )}
+            </div>
+
+            {/* Retake Request */}
+            <div id="retake-request" className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 scroll-mt-24">
+              <div className="flex items-center gap-2 mb-4">
+                <RotateCcw className="w-5 h-5 text-amber-600" />
+                <h2 className="text-xl font-semibold text-gray-900">Retake Request</h2>
+              </div>
+
+              {!studentData.retake_request ? (
+                <p className="text-sm text-gray-500">No retake request from this student.</p>
+              ) : studentData.retake_request.status === 'pending' ? (
+                <div className="space-y-4">
+                  <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
+                      <span className="font-medium text-amber-800 text-sm">Pending Approval</span>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Requested on {new Date(studentData.retake_request.requested_at).toLocaleString()}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      This student has requested to retake their career assessment. Approving will allow them to complete a new assessment.
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      disabled={retakeActionLoading}
+                      onClick={() => handleRetakeAction('deny')}
+                      className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer text-sm disabled:opacity-50"
+                    >
+                      Deny
+                    </button>
+                    <button
+                      type="button"
+                      disabled={retakeActionLoading}
+                      onClick={() => handleRetakeAction('approve')}
+                      className="px-5 py-2.5 rounded-xl bg-amber-600 text-white font-medium hover:bg-amber-700 transition-colors cursor-pointer text-sm disabled:opacity-50"
+                    >
+                      {retakeActionLoading ? 'Processing...' : 'Approve Retake'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className={`p-4 rounded-xl border ${
+                  studentData.retake_request.status === 'approved' ? 'bg-emerald-50 border-emerald-200' :
+                  studentData.retake_request.status === 'denied' ? 'bg-gray-50 border-gray-200' :
+                  'bg-violet-50 border-violet-200'
+                }`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`inline-block w-2 h-2 rounded-full ${
+                      studentData.retake_request.status === 'approved' ? 'bg-emerald-500' :
+                      studentData.retake_request.status === 'denied' ? 'bg-gray-400' :
+                      'bg-violet-500'
+                    }`} />
+                    <span className={`font-medium text-sm ${
+                      studentData.retake_request.status === 'approved' ? 'text-emerald-800' :
+                      studentData.retake_request.status === 'denied' ? 'text-gray-600' :
+                      'text-violet-800'
+                    }`}>
+                      Retake {studentData.retake_request.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Requested on {new Date(studentData.retake_request.requested_at).toLocaleString()}
+                    {studentData.retake_request.responded_at && (
+                      <> &middot; Responded on {new Date(studentData.retake_request.responded_at).toLocaleString()}</>
+                    )}
+                  </p>
                 </div>
               )}
             </div>

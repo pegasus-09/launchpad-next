@@ -3,8 +3,14 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
-import { ArrowLeft, Search, CheckCircle, XCircle, Clock, MoreVertical, Pencil, Trash2, UserPlus } from 'lucide-react'
+import { ArrowLeft, Search, CheckCircle, XCircle, Clock, MoreVertical, Pencil, Trash2, UserPlus, AlertCircle, X } from 'lucide-react'
 import LogoutButton from '@/components/auth/LogoutButton'
+
+interface RetakeRequest {
+  id: string
+  status: 'pending' | 'approved' | 'denied'
+  requested_at: string
+}
 
 interface Student {
   id: string
@@ -18,6 +24,7 @@ interface Student {
   has_assessment: boolean
   has_teacher_comment?: boolean
   subjects_count?: number
+  retake_request?: RetakeRequest | null
 }
 
 export default function StudentsPage() {
@@ -28,6 +35,8 @@ export default function StudentsPage() {
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null)
+  const [retakeModalStudent, setRetakeModalStudent] = useState<Student | null>(null)
+  const [retakeActionLoading, setRetakeActionLoading] = useState(false)
 
   useEffect(() => {
     loadStudents()
@@ -69,18 +78,28 @@ export default function StudentsPage() {
   )
 
   function getAssessmentStatus(student: Student) {
+    // Retake requested takes priority as a status indicator
+    if (student.retake_request?.status === 'pending') {
+      return {
+        label: 'Retake requested',
+        icon: AlertCircle,
+        iconClass: 'text-amber-600',
+        bgClass: 'bg-amber-100'
+      }
+    }
+
     if (!student.has_assessment) {
       return {
-        label: 'Assessment not submitted',
+        label: 'Assessment not completed',
         icon: XCircle,
-        iconClass: 'text-rose-700',
-        bgClass: 'bg-rose-100'
+        iconClass: 'text-gray-400',
+        bgClass: 'bg-gray-100'
       }
     }
 
     if (student.has_teacher_comment) {
       return {
-        label: 'Report available',
+        label: 'Assessment complete',
         icon: CheckCircle,
         iconClass: 'text-emerald-600',
         bgClass: 'bg-emerald-50'
@@ -88,10 +107,10 @@ export default function StudentsPage() {
     }
 
     return {
-      label: 'Pending teacher comment', 
+      label: 'Pending teacher comment',
       icon: Clock,
-      iconClass: 'text-amber-500',
-      bgClass: 'bg-amber-50'
+      iconClass: 'text-sky-600',
+      bgClass: 'bg-sky-50'
     }
   }
 
@@ -106,6 +125,33 @@ export default function StudentsPage() {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error'
       alert('Failed to delete student: ' + message)
+    }
+  }
+
+  async function handleRetakeAction(action: 'approve' | 'deny') {
+    if (!retakeModalStudent?.retake_request) return
+
+    setRetakeActionLoading(true)
+    try {
+      const requestId = retakeModalStudent.retake_request.id
+      if (action === 'approve') {
+        await adminApi.approveRetake(requestId)
+      } else {
+        await adminApi.denyRetake(requestId)
+      }
+
+      // Update local state to remove the retake request indicator
+      setStudents(prev => prev.map(s =>
+        s.id === retakeModalStudent.id
+          ? { ...s, retake_request: null }
+          : s
+      ))
+      setRetakeModalStudent(null)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      alert(`Failed to ${action} retake: ${message}`)
+    } finally {
+      setRetakeActionLoading(false)
     }
   }
 
@@ -200,17 +246,28 @@ export default function StudentsPage() {
                       {(() => {
                         const status = getAssessmentStatus(student)
                         const StatusIcon = status.icon
+                        const hasRetakeRequest = student.retake_request?.status === 'pending'
                         return (
                           <div className="relative group">
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center ${status.bgClass}`}
+                            <button
+                              type="button"
+                              className={`w-8 h-8 rounded-full flex items-center justify-center ${status.bgClass} ${hasRetakeRequest ? 'ring-2 ring-amber-400 ring-offset-1 cursor-pointer' : ''}`}
                               aria-label={status.label}
+                              onClick={(event) => {
+                                if (hasRetakeRequest) {
+                                  event.stopPropagation()
+                                  setRetakeModalStudent(student)
+                                }
+                              }}
                             >
                               <StatusIcon className={`w-5 h-5 ${status.iconClass}`} />
-                            </div>
-                            <div className="pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 opacity-0 transition-opacity group-hover:opacity-100">
+                            </button>
+                            <div className="pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 opacity-0 transition-opacity group-hover:opacity-100 z-20">
                               <span className="whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-lg">
                                 {status.label}
+                                {hasRetakeRequest && student.retake_request?.requested_at && (
+                                  <> &middot; {new Date(student.retake_request.requested_at).toLocaleDateString()}</>
+                                )}
                               </span>
                               <span className="absolute left-1/2 -top-2 -translate-x-1/2 border-4 border-transparent border-b-slate-900" />
                             </div>
@@ -281,6 +338,65 @@ export default function StudentsPage() {
           </div>
         )}
       </div>
+
+      {/* Retake Request Modal */}
+      {retakeModalStudent && retakeModalStudent.retake_request && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => !retakeActionLoading && setRetakeModalStudent(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 pt-5 pb-0">
+              <h3 className="text-lg font-semibold text-gray-900">Retake Request</h3>
+              <button
+                type="button"
+                onClick={() => !retakeActionLoading && setRetakeModalStudent(null)}
+                className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-5 py-4 space-y-3">
+              <div>
+                <p className="text-sm text-gray-500">Student</p>
+                <p className="font-medium text-gray-900">{retakeModalStudent.full_name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Requested</p>
+                <p className="font-medium text-gray-900">
+                  {new Date(retakeModalStudent.retake_request.requested_at).toLocaleString()}
+                </p>
+              </div>
+              <p className="text-sm text-gray-600">
+                This student has requested to retake their career assessment. Approving will allow them to complete a new assessment.
+              </p>
+            </div>
+
+            <div className="flex gap-3 px-5 pb-5">
+              <button
+                type="button"
+                disabled={retakeActionLoading}
+                onClick={() => handleRetakeAction('deny')}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer text-sm disabled:opacity-50"
+              >
+                Deny
+              </button>
+              <button
+                type="button"
+                disabled={retakeActionLoading}
+                onClick={() => handleRetakeAction('approve')}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-700 transition-colors cursor-pointer text-sm disabled:opacity-50"
+              >
+                {retakeActionLoading ? 'Processing...' : 'Approve'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

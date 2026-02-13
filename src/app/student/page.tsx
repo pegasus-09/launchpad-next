@@ -80,6 +80,14 @@ interface AnalysisData {
   updated_at?: string
 }
 
+interface RetakeStatus {
+  has_request: boolean
+  request_id?: string
+  status: 'pending' | 'approved' | 'denied' | 'used' | null
+  requested_at?: string
+  responded_at?: string
+}
+
 export default function StudentDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -89,6 +97,10 @@ export default function StudentDashboard() {
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
   const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [retakeStatus, setRetakeStatus] = useState<RetakeStatus | null>(null)
+  const [retakeStatusLoaded, setRetakeStatusLoaded] = useState(false)
+  const [retakeLoading, setRetakeLoading] = useState(false)
+  const [retakeError, setRetakeError] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -103,14 +115,17 @@ export default function StudentDashboard() {
 
         setProfileData(data)
 
-        // Load teacher status and existing analysis in parallel
+        // Load teacher status, analysis, and retake status in parallel
         if (data.assessment) {
-          const [statusResult, analysisResult] = await Promise.all([
+          const [statusResult, analysisResult, retakeResult] = await Promise.all([
             studentApi.getTeacherStatus().catch(() => null),
             studentApi.getAnalysis().catch(() => null),
+            studentApi.getRetakeStatus().catch(() => null),
           ])
           if (statusResult) setTeacherStatus(statusResult)
           if (analysisResult?.analysis) setAnalysis(analysisResult.analysis)
+          if (retakeResult) setRetakeStatus(retakeResult)
+          setRetakeStatusLoaded(true)
         }
       } catch (err: unknown) {
         console.error('Dashboard error:', err)
@@ -141,6 +156,23 @@ export default function StudentDashboard() {
       }
     } finally {
       setAnalysisLoading(false)
+    }
+  }
+
+  const handleRequestRetake = async () => {
+    setRetakeLoading(true)
+    setRetakeError(null)
+    try {
+      await studentApi.requestRetake()
+      setRetakeStatus({ has_request: true, status: 'pending', requested_at: new Date().toISOString() })
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setRetakeError(err.message)
+      } else {
+        setRetakeError('Failed to request retake')
+      }
+    } finally {
+      setRetakeLoading(false)
     }
   }
 
@@ -265,12 +297,32 @@ export default function StudentDashboard() {
                   </p>
                 )}
               </div>
-              <button
-                onClick={() => router.push('/student/assessment')}
-                className="text-md border px-2.5 py-2 rounded-md cursor-pointer text-violet-600 hover:bg-violet-100 transition-colors font-medium"
-              >
-                Retake Assessment
-              </button>
+              {/* Retake flow: approved → retake, pending → waiting, denied/used/none → can request */}
+              {!retakeStatusLoaded ? (
+                <span className="text-sm text-gray-400 px-3 py-2">Loading...</span>
+              ) : retakeStatus?.status === 'approved' ? (
+                <button
+                  onClick={() => router.push('/student/assessment')}
+                  className="text-md border border-emerald-300 px-2.5 py-2 rounded-md cursor-pointer text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors font-medium"
+                >
+                  Retake Assessment
+                </button>
+              ) : retakeStatus?.status === 'pending' ? (
+                <span className="text-sm text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-md font-medium">
+                  Retake requested
+                </span>
+              ) : (
+                <button
+                  onClick={handleRequestRetake}
+                  disabled={retakeLoading}
+                  className="text-md border px-2.5 py-2 rounded-md cursor-pointer text-violet-600 hover:bg-violet-100 transition-colors font-medium disabled:opacity-50"
+                >
+                  {retakeLoading ? 'Requesting...' : 'Request Retake'}
+                </button>
+              )}
+              {retakeError && (
+                <p className="text-sm text-rose-600 mt-1">{retakeError}</p>
+              )}
             </div>
 
             {ranking.length === 0 ? (

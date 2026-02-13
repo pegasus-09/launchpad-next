@@ -273,6 +273,30 @@ export const studentApi = {
 
     return response.json()
   },
+
+  async requestRetake() {
+    const response = await authenticatedFetch('/student/request-retake', {
+      method: 'POST',
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to request retake: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async getRetakeStatus() {
+    const response = await authenticatedFetch('/student/retake-status')
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load retake status: ${error}`)
+    }
+
+    return response.json()
+  },
 }
 
 // ============================================================================
@@ -741,6 +765,47 @@ export const adminApi = {
     if (!response.ok) {
       const error = await response.text()
       throw new Error(`Failed to delete note: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  // ========================================================================
+  // RETAKE REQUESTS
+  // ========================================================================
+
+  async getRetakeRequests() {
+    const response = await authenticatedFetch('/admin/retake-requests')
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to load retake requests: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async approveRetake(requestId: string) {
+    const response = await authenticatedFetch(`/admin/retake-request/${requestId}/approve`, {
+      method: 'POST',
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to approve retake: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async denyRetake(requestId: string) {
+    const response = await authenticatedFetch(`/admin/retake-request/${requestId}/deny`, {
+      method: 'POST',
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to deny retake: ${error}`)
     }
 
     return response.json()

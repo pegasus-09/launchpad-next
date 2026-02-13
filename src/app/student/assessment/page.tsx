@@ -19,11 +19,12 @@ export default function AssessmentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [blockedMessage, setBlockedMessage] = useState<string | null>(null)
 
   // Follow-up state
   const [followUpQuestions, setFollowUpQuestions] = useState<FollowUpQuestion[] | null>(null)
 
-  // Check authentication and role - only students can access this page
+  // Check authentication, role, and retake eligibility
   useEffect(() => {
     async function checkAuth() {
       const supabase = createClient()
@@ -49,7 +50,6 @@ export default function AssessmentPage() {
 
       // Only allow students to access this page
       if (profile.role !== 'student') {
-        // Redirect non-students to their appropriate dashboard
         if (profile.role === 'teacher') {
           router.push('/teacher/')
         } else if (profile.role === 'admin') {
@@ -58,6 +58,29 @@ export default function AssessmentPage() {
           router.push('/login')
         }
         return
+      }
+
+      // Check if student already has an assessment — if so, need approved retake
+      const { data: existingAssessment } = await supabase
+        .from('assessment_results')
+        .select('user_id')
+        .eq('user_id', session.user.id)
+        .maybeSingle()
+
+      if (existingAssessment) {
+        // Student already took assessment — check for approved retake
+        try {
+          const retakeStatus = await studentApi.getRetakeStatus()
+          if (retakeStatus.status !== 'approved') {
+            setBlockedMessage('You need an approved retake request to retake the assessment. Please request one from your dashboard.')
+            setIsLoading(false)
+            return
+          }
+        } catch {
+          setBlockedMessage('Unable to verify retake status. Please go back to your dashboard.')
+          setIsLoading(false)
+          return
+        }
       }
 
       setIsLoading(false)
@@ -156,6 +179,29 @@ export default function AssessmentPage() {
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mb-4"></div>
           <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Blocked — no retake approval
+  if (blockedMessage) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-violet-50 via-white to-teal-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 max-w-md w-full text-center">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 256 256" className="text-amber-600">
+              <path fill="currentColor" d="M236.8 188.09L149.35 36.22a24.76 24.76 0 0 0-42.7 0L19.2 188.09a23.51 23.51 0 0 0 0 23.72A24.35 24.35 0 0 0 40.55 224h174.9a24.35 24.35 0 0 0 21.33-12.19a23.51 23.51 0 0 0 .02-23.72M120 104a8 8 0 0 1 16 0v40a8 8 0 0 1-16 0Zm8 88a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Assessment Locked</h2>
+          <p className="text-gray-600 text-sm mb-6">{blockedMessage}</p>
+          <button
+            onClick={() => router.push('/student')}
+            className="px-5 py-2.5 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-700 transition-colors cursor-pointer text-sm"
+          >
+            Back to Dashboard
+          </button>
         </div>
       </div>
     )
