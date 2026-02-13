@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { adminApi } from '@/lib/api'
 import { ArrowLeft, Users, BookOpen, TrendingUp } from 'lucide-react'
 import LogoutButton from '@/components/auth/LogoutButton'
+import { normaliseRankingScore } from '@/lib/normalise'
 
 interface TopCareer {
   soc_code: string
@@ -169,7 +170,7 @@ export default function ReportsPage() {
                       <div className="text-right">
                         <div className="font-semibold text-teal-700">{student.top_career.career_name}</div>
                         <div className="text-sm text-gray-600">
-                          Match: {(student.top_career.score * 100).toFixed(0)}%
+                          Match: {normaliseRankingScore(student.top_career.score)}%
                         </div>
                       </div>
                     )}
