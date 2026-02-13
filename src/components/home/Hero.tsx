@@ -135,7 +135,7 @@ export default function Hero() {
           className={`text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] ${t.heading}`}
           style={{ animation: "fade-in-up 0.6s ease-out 0.1s both" }}
         >
-          AI-powered career guidance with{" "}
+          Intelligent career guidance with{" "}
           <span className="relative inline-block">
             <span
               className={`bg-linear-to-r ${t.gradientFrom} ${t.gradientVia} ${t.gradientTo} bg-clip-text text-transparent bg-size-[200%_200%]`}

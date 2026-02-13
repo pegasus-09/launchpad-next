@@ -65,6 +65,12 @@ const TrashIcon = () => (
   </svg>
 )
 
+const SparkleIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+  </svg>
+)
+
 const SystemBadge = () => (
   <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-teal-100 text-teal-700">
     auto
@@ -104,6 +110,48 @@ export default function PortfolioPage() {
   const [newWork, setNewWork] = useState({ title: "", organisation: "", description: "", start_date: "", end_date: "" })
   const [newVolunteer, setNewVolunteer] = useState({ title: "", organisation: "", description: "" })
   const [newExtra, setNewExtra] = useState({ name: "", role: "", description: "" })
+  const [enhancingField, setEnhancingField] = useState<string | null>(null)
+
+  async function handleEnhance(field: string, text: string, context?: { title?: string; role?: string }) {
+    if (!text.trim() || enhancingField) return
+    setEnhancingField(field)
+    try {
+      const result = await studentApi.enhanceText({ field, text, context })
+      if (result.enhanced_text) {
+        if (field === "summary") {
+          setPortfolio(p => ({ ...p, summary: result.enhanced_text }))
+        } else if (field.startsWith("work_exp_")) {
+          const idx = parseInt(field.split("_")[2])
+          setPortfolio(p => ({
+            ...p,
+            work_experience: p.work_experience.map((w, i) => i === idx ? { ...w, description: result.enhanced_text } : w)
+          }))
+        } else if (field.startsWith("volunteer_")) {
+          const idx = parseInt(field.split("_")[1])
+          setPortfolio(p => ({
+            ...p,
+            volunteering: p.volunteering.map((v, i) => i === idx ? { ...v, description: result.enhanced_text } : v)
+          }))
+        } else if (field.startsWith("extra_")) {
+          const idx = parseInt(field.split("_")[1])
+          setPortfolio(p => ({
+            ...p,
+            extracurriculars: p.extracurriculars.map((e, i) => i === idx ? { ...e, description: result.enhanced_text } : e)
+          }))
+        } else if (field === "new_work_desc") {
+          setNewWork(w => ({ ...w, description: result.enhanced_text }))
+        } else if (field === "new_volunteer_desc") {
+          setNewVolunteer(v => ({ ...v, description: result.enhanced_text }))
+        } else if (field === "new_extra_desc") {
+          setNewExtra(x => ({ ...x, description: result.enhanced_text }))
+        }
+      }
+    } catch (err) {
+      console.error("Enhance error:", err)
+    } finally {
+      setEnhancingField(null)
+    }
+  }
 
   useEffect(() => {
     async function loadData() {
@@ -404,7 +452,7 @@ export default function PortfolioPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-emerald-800">My Portfolio</h1>
+            <h1 className="text-3xl font-bold text-black">My Portfolio</h1>
             <p className="text-gray-500 mt-1">Curate your resume-style profile</p>
           </div>
           {buttonBar}
@@ -435,7 +483,24 @@ export default function PortfolioPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Summary</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">Summary</label>
+              {portfolio.summary.trim() && (
+                <button
+                  onClick={() => handleEnhance("summary", portfolio.summary)}
+                  disabled={enhancingField === "summary"}
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-violet-600 hover:bg-violet-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                  title="Enhance with AI"
+                >
+                  {enhancingField === "summary" ? (
+                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-violet-600" />
+                  ) : (
+                    <SparkleIcon />
+                  )}
+                  Enhance
+                </button>
+              )}
+            </div>
             <textarea
               value={portfolio.summary}
               onChange={e => setPortfolio(p => ({ ...p, summary: e.target.value }))}
@@ -472,7 +537,7 @@ export default function PortfolioPage() {
             />
             <button
               onClick={addSkill}
-              className="inline-flex items-center gap-1 px-4 py-2 bg-violet-100 text-violet-700 rounded-lg hover:bg-violet-200 transition-colors text-sm font-medium cursor-pointer"
+              className="inline-flex items-center gap-1 px-4 py-2 bg-violet-100 text-violet-700 rounded-xl hover:bg-violet-200 transition-colors text-sm font-medium cursor-pointer"
             >
               <PlusIcon /> Add Skill
             </button>
@@ -486,13 +551,29 @@ export default function PortfolioPage() {
             <div className="space-y-3">
               {portfolio.work_experience.map((exp, i) => (
                 <div key={i} className="flex items-start justify-between p-4 border border-gray-200 rounded-xl">
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-gray-900">
                       {exp.title}
                       {exp.source === "system" && <SystemBadge />}
                     </h3>
                     <p className="text-sm text-gray-600">{exp.organisation}</p>
-                    {exp.description && <p className="text-sm text-gray-500 mt-1">{exp.description}</p>}
+                    {exp.description && (
+                      <div className="flex items-start gap-1 mt-1">
+                        <p className="text-sm text-gray-500 flex-1">{exp.description}</p>
+                        <button
+                          onClick={() => handleEnhance(`work_exp_${i}`, exp.description || "", { title: exp.title })}
+                          disabled={enhancingField === `work_exp_${i}`}
+                          className="inline-flex items-center shrink-0 p-1 text-violet-500 hover:bg-violet-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                          title="Enhance with AI"
+                        >
+                          {enhancingField === `work_exp_${i}` ? (
+                            <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-violet-600" />
+                          ) : (
+                            <SparkleIcon />
+                          )}
+                        </button>
+                      </div>
+                    )}
                     {(exp.start_date || exp.end_date) && (
                       <p className="text-xs text-gray-400 mt-1">
                         {exp.start_date}{exp.end_date ? ` - ${exp.end_date}` : " - Present"}
@@ -523,13 +604,30 @@ export default function PortfolioPage() {
                 placeholder="Organisation"
               />
             </div>
-            <input
-              type="text"
-              value={newWork.description}
-              onChange={e => setNewWork(w => ({ ...w, description: e.target.value }))}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-              placeholder="Description (optional)"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={newWork.description}
+                onChange={e => setNewWork(w => ({ ...w, description: e.target.value }))}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-20 text-sm text-gray-900 focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                placeholder="Description (optional)"
+              />
+              {newWork.description.trim() && (
+                <button
+                  onClick={() => handleEnhance("new_work_desc", newWork.description, { title: newWork.title })}
+                  disabled={enhancingField === "new_work_desc"}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-violet-600 hover:bg-violet-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                  title="Enhance with AI"
+                >
+                  {enhancingField === "new_work_desc" ? (
+                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-violet-600" />
+                  ) : (
+                    <SparkleIcon />
+                  )}
+                  Enhance
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <input
                 type="date"
@@ -546,7 +644,7 @@ export default function PortfolioPage() {
             </div>
             <button
               onClick={addWorkExperience}
-              className="inline-flex items-center gap-1 px-4 py-2 bg-violet-100 text-violet-700 rounded-lg hover:bg-violet-200 transition-colors text-sm font-medium cursor-pointer"
+              className="inline-flex items-center gap-1 px-4 py-2 bg-violet-100 text-violet-700 rounded-xl hover:bg-violet-200 transition-colors text-sm font-medium cursor-pointer"
             >
               <PlusIcon /> Add Experience
             </button>
@@ -598,7 +696,7 @@ export default function PortfolioPage() {
             />
             <button
               onClick={addCertification}
-              className="inline-flex items-center gap-1 px-4 py-2 bg-violet-100 text-violet-700 rounded-lg hover:bg-violet-200 transition-colors text-sm font-medium cursor-pointer"
+              className="inline-flex items-center gap-1 px-4 py-2 bg-violet-100 text-violet-700 rounded-xl hover:bg-violet-200 transition-colors text-sm font-medium cursor-pointer"
             >
               <PlusIcon /> Add Certification
             </button>
@@ -612,10 +710,26 @@ export default function PortfolioPage() {
             <div className="space-y-3">
               {portfolio.volunteering.map((vol, i) => (
                 <div key={i} className="flex items-start justify-between p-4 border border-gray-200 rounded-xl">
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-gray-900">{vol.title}</h3>
                     <p className="text-sm text-gray-600">{vol.organisation}</p>
-                    {vol.description && <p className="text-sm text-gray-500 mt-1">{vol.description}</p>}
+                    {vol.description && (
+                      <div className="flex items-start gap-1 mt-1">
+                        <p className="text-sm text-gray-500 flex-1">{vol.description}</p>
+                        <button
+                          onClick={() => handleEnhance(`volunteer_${i}`, vol.description || "", { title: vol.title })}
+                          disabled={enhancingField === `volunteer_${i}`}
+                          className="inline-flex items-center shrink-0 p-1 text-violet-500 hover:bg-violet-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                          title="Enhance with AI"
+                        >
+                          {enhancingField === `volunteer_${i}` ? (
+                            <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-violet-600" />
+                          ) : (
+                            <SparkleIcon />
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <button onClick={() => removeVolunteering(i)} className="text-gray-400 hover:text-red-500 transition-colors cursor-pointer p-1">
                     <TrashIcon />
@@ -641,16 +755,33 @@ export default function PortfolioPage() {
                 placeholder="Organisation"
               />
             </div>
-            <input
-              type="text"
-              value={newVolunteer.description}
-              onChange={e => setNewVolunteer(v => ({ ...v, description: e.target.value }))}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-              placeholder="Description (optional)"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={newVolunteer.description}
+                onChange={e => setNewVolunteer(v => ({ ...v, description: e.target.value }))}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-20 text-sm text-gray-900 focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                placeholder="Description (optional)"
+              />
+              {newVolunteer.description.trim() && (
+                <button
+                  onClick={() => handleEnhance("new_volunteer_desc", newVolunteer.description, { title: newVolunteer.title })}
+                  disabled={enhancingField === "new_volunteer_desc"}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-violet-600 hover:bg-violet-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                  title="Enhance with AI"
+                >
+                  {enhancingField === "new_volunteer_desc" ? (
+                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-violet-600" />
+                  ) : (
+                    <SparkleIcon />
+                  )}
+                  Enhance
+                </button>
+              )}
+            </div>
             <button
               onClick={addVolunteering}
-              className="inline-flex items-center gap-1 px-4 py-2 bg-violet-100 text-violet-700 rounded-lg hover:bg-violet-200 transition-colors text-sm font-medium cursor-pointer"
+              className="inline-flex items-center gap-1 px-4 py-2 bg-violet-100 text-violet-700 rounded-xl hover:bg-violet-200 transition-colors text-sm font-medium cursor-pointer"
             >
               <PlusIcon /> Add Volunteering
             </button>
@@ -664,10 +795,26 @@ export default function PortfolioPage() {
             <div className="space-y-3">
               {portfolio.extracurriculars.map((ec, i) => (
                 <div key={i} className="flex items-start justify-between p-4 border border-gray-200 rounded-xl">
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-gray-900">{ec.name}</h3>
                     {ec.role && <p className="text-sm text-gray-600">{ec.role}</p>}
-                    {ec.description && <p className="text-sm text-gray-500 mt-1">{ec.description}</p>}
+                    {ec.description && (
+                      <div className="flex items-start gap-1 mt-1">
+                        <p className="text-sm text-gray-500 flex-1">{ec.description}</p>
+                        <button
+                          onClick={() => handleEnhance(`extra_${i}`, ec.description || "", { title: ec.name, role: ec.role })}
+                          disabled={enhancingField === `extra_${i}`}
+                          className="inline-flex items-center shrink-0 p-1 text-violet-500 hover:bg-violet-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                          title="Enhance with AI"
+                        >
+                          {enhancingField === `extra_${i}` ? (
+                            <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-violet-600" />
+                          ) : (
+                            <SparkleIcon />
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <button onClick={() => removeExtracurricular(i)} className="text-gray-400 hover:text-red-500 transition-colors cursor-pointer p-1">
                     <TrashIcon />
@@ -693,16 +840,33 @@ export default function PortfolioPage() {
                 placeholder="Your role (optional)"
               />
             </div>
-            <input
-              type="text"
-              value={newExtra.description}
-              onChange={e => setNewExtra(x => ({ ...x, description: e.target.value }))}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-              placeholder="Description (optional)"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={newExtra.description}
+                onChange={e => setNewExtra(x => ({ ...x, description: e.target.value }))}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-20 text-sm text-gray-900 focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                placeholder="Description (optional)"
+              />
+              {newExtra.description.trim() && (
+                <button
+                  onClick={() => handleEnhance("new_extra_desc", newExtra.description, { title: newExtra.name, role: newExtra.role })}
+                  disabled={enhancingField === "new_extra_desc"}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-violet-600 hover:bg-violet-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                  title="Enhance with AI"
+                >
+                  {enhancingField === "new_extra_desc" ? (
+                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-violet-600" />
+                  ) : (
+                    <SparkleIcon />
+                  )}
+                  Enhance
+                </button>
+              )}
+            </div>
             <button
               onClick={addExtracurricular}
-              className="inline-flex items-center gap-1 px-4 py-2 bg-violet-100 text-violet-700 rounded-lg hover:bg-violet-200 transition-colors text-sm font-medium cursor-pointer"
+              className="inline-flex items-center gap-1 px-4 py-2 bg-violet-100 text-violet-700 rounded-xl hover:bg-violet-200 transition-colors text-sm font-medium cursor-pointer"
             >
               <PlusIcon /> Add Extracurricular
             </button>

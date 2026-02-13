@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
+import Logo from "@/components/ui/Logo"
 
 export default function Navbar() {
   const router = useRouter()
@@ -70,9 +71,8 @@ export default function Navbar() {
               <span className="text-lg">←</span> Back
             </button>
           )}
-          <Link href="/" className="text-lg font-bold font-mono">
-            <span className="text-violet-400">launch</span>
-            <span className="text-teal-400">pad</span>
+          <Link href="/">
+            <Logo size="sm" variant="dark" />
           </Link>
         </div>
 

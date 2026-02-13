@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import AuthLayout from "@/components/auth/AuthLayout";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 function SignupContent() {
   const [email, setEmail] = useState("");
@@ -12,6 +13,7 @@ function SignupContent() {
   const [educationLevel, setEducationLevel] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams()
   const message = searchParams.get('message')
@@ -82,13 +84,23 @@ function SignupContent() {
           className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
         />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-xl border border-gray-200 px-4 py-3 text-black focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-xl border border-gray-200 px-4 py-3 pr-11 text-black focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
 
         <select
           value={educationLevel}

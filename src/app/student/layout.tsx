@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import LogoutButton from "@/components/auth/LogoutButton"
+import Logo from "@/components/ui/Logo"
 import Link from "next/link"
 
 type Props = {
@@ -69,9 +70,8 @@ export default function DashboardLayout({ children }: Props) {
             <aside className="fixed inset-y-0 left-0 flex w-64 flex-col border-r bg-gray-800 px-4 py-6">
                 <div className="flex flex-col space-y-7.5">
                     <div>
-                        <Link href="/student/" className="text-3xl font-bold font-mono">
-                            <span className="text-violet-400">launch</span>
-                            <span className="text-teal-400">pad</span>
+                        <Link href="/student/" className="inline-block">
+                            <Logo size="lg" variant="dark" />
                         </Link>
                         {studentName && (
                             <div className="text-sm text-gray-400 mt-2 truncate">

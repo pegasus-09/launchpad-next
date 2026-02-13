@@ -260,6 +260,38 @@ export const studentApi = {
     return response.json()
   },
 
+  async enhanceText(data: {
+    field: string
+    text: string
+    context?: { title?: string; role?: string }
+  }) {
+    const response = await authenticatedFetch('/student/portfolio/enhance', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to enhance text: ${error}`)
+    }
+
+    return response.json()
+  },
+
+  async analyseCareerGoal(data: { soc_code: string; title: string }) {
+    const response = await authenticatedFetch('/student/career-goals/analyse', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Failed to analyse career goal: ${error}`)
+    }
+
+    return response.json()
+  },
+
   async submitFollowUp(followUpAnswers: { id: string; question: string; answer: string }[]) {
     const response = await authenticatedFetch('/student/assessment/follow-up', {
       method: 'POST',

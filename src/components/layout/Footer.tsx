@@ -1,10 +1,9 @@
+import Logo from "@/components/ui/Logo"
+
 export default function Footer() {
   return (
-    <footer className="py-4 text-center bg-gray-800">
-      <div className="text-lg font-mono font-bold">
-        <span className="text-violet-400">launch</span>
-        <span className="text-teal-400">pad</span>
-      </div>
+    <footer className="py-4 flex flex-col items-center bg-gray-800">
+      <Logo size="sm" variant="dark" />
       <p className="mt-1 text-xs text-gray-500">
         Career guidance for the next generation
       </p>

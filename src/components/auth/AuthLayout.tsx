@@ -33,10 +33,9 @@ function FloatingOrbs() {
         className="absolute h-1.5 w-1.5 rounded-full bg-white/25"
         style={{ animation: "pulse-soft 4s ease-in-out infinite 1s", bottom: "-10px", left: "10px" }}
       />
-      {/* Logo text */}
-      <div className="relative text-3xl font-mono font-bold text-white select-none">
-        <span>launch</span>
-        <span>pad</span>
+      {/* Logo — white text only on gradient background */}
+      <div className="relative select-none text-3xl font-bold text-white" style={{ letterSpacing: "-0.03em" }}>
+        launchpad
       </div>
     </div>
   )
