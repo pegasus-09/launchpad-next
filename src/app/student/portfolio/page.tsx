@@ -497,7 +497,7 @@ export default function PortfolioPage() {
                   ) : (
                     <SparkleIcon />
                   )}
-                  Enhance
+                  Enhance with AI
                 </button>
               )}
             </div>
