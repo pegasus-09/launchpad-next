@@ -12,7 +12,6 @@
 
 # testing
 /coverage
-/src/app/teacher/backend-files-debug
 
 # next.js
 /.next/
@@ -41,3 +40,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+FRONT_PAGE_UPGRADE_PROMPT.md
