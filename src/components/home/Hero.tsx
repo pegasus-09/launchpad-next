@@ -18,10 +18,6 @@ const themes = {
     gradientFrom: "from-violet-400",
     gradientVia: "via-teal-400",
     gradientTo: "to-violet-400",
-    cardBg: "bg-gray-800/80 border-gray-700",
-    cardText: "text-white",
-    cardSubtext: "text-gray-400",
-    cardTrack: "bg-gray-700",
   },
   light: {
     bg: "bg-linear-to-b from-white via-violet-50/30 to-teal-50/30",
@@ -37,81 +33,12 @@ const themes = {
     gradientFrom: "from-violet-600",
     gradientVia: "via-teal-500",
     gradientTo: "to-violet-600",
-    cardBg: "bg-white/90 border-gray-200",
-    cardText: "text-gray-900",
-    cardSubtext: "text-gray-500",
-    cardTrack: "bg-gray-100",
   },
 }
 
 const scrambleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%"
 const targetWord = "Launchpad"
 
-type ThemeValues = typeof themes["dark"]
-
-interface CareerMatchCardProps {
-  variant: "dark" | "light"
-  t: ThemeValues
-}
-
-function CareerMatchCard({ variant, t }: CareerMatchCardProps) {
-  const [barWidths, setBarWidths] = useState([0, 0, 0])
-  const matches = [
-    { label: "Software Engineer", pct: 94 },
-    { label: "Data Scientist", pct: 87 },
-    { label: "UX Designer", pct: 81 },
-  ]
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setBarWidths([94, 87, 81])
-    }, 1500)
-    return () => clearTimeout(timer)
-  }, [])
-
-  // Suppress unused-var warning — variant is used for cardTrack class logic below
-  void variant
-
-  return (
-    <div
-      className={`rounded-2xl border backdrop-blur-md p-6 shadow-2xl ${t.cardBg}`}
-      style={{ animation: "float-card 6s ease-in-out infinite" }}
-    >
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-xs font-semibold text-violet-500 uppercase tracking-wider">AI Career Analysis</span>
-      </div>
-      <div className="flex items-center gap-2 mb-5">
-        <h3 className={`font-bold text-base ${t.cardText}`}>Your top matches</h3>
-        <span className="flex items-center gap-1 ml-auto">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-400" />
-          </span>
-          <span className="text-xs text-teal-500">Live</span>
-        </span>
-      </div>
-      <div className="space-y-4">
-        {matches.map((m, i) => (
-          <div key={m.label}>
-            <div className="flex justify-between mb-1.5">
-              <span className={`text-sm font-medium ${t.cardText}`}>{m.label}</span>
-              <span className="text-sm font-bold text-violet-500">{m.pct}%</span>
-            </div>
-            <div className={`h-1.5 rounded-full ${t.cardTrack}`}>
-              <div
-                className="h-1.5 rounded-full bg-linear-to-r from-violet-500 to-teal-500"
-                style={{
-                  width: `${barWidths[i]}%`,
-                  transition: `width 0.8s ease ${i * 0.2}s`,
-                }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 export default function Hero() {
   const [variant, setVariant] = useState<"dark" | "light">("dark")
@@ -462,9 +389,7 @@ export default function Hero() {
       <div className={`absolute top-0 left-1/4 w-125 h-125 rounded-full ${t.orbA} blur-[120px]`} />
       <div className={`absolute bottom-0 right-1/4 w-100 h-100 rounded-full ${t.orbB} blur-[100px]`} />
 
-      <div className="relative mx-auto max-w-6xl px-6 flex flex-col xl:flex-row xl:items-center xl:gap-16">
-        {/* Left: text content */}
-        <div className="flex-1 text-center xl:text-left">
+      <div className="relative mx-auto max-w-4xl px-6 text-center">
           {/* AI Badge */}
           <div
             className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium mb-8 ${t.badge}`}
@@ -493,7 +418,7 @@ export default function Hero() {
           </h1>
 
           <p
-            className={`mt-6 text-lg md:text-xl max-w-2xl mx-auto xl:mx-0 leading-relaxed ${t.subtitle}`}
+            className={`mt-6 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed ${t.subtitle}`}
             style={{ animation: "fade-in-up 0.6s ease-out 0.2s both" }}
           >
             Psychometric assessments and personalised career recommendations
@@ -501,7 +426,7 @@ export default function Hero() {
           </p>
 
           <div
-            className="mt-10 flex flex-col sm:flex-row justify-center xl:justify-start gap-4"
+            className="mt-10 flex flex-col sm:flex-row justify-center gap-4"
             style={{ animation: "fade-in-up 0.6s ease-out 0.3s both" }}
           >
             <Link
@@ -520,15 +445,6 @@ export default function Hero() {
               Learn more
             </Link>
           </div>
-        </div>
-
-        {/* Right: floating card, xl screens only */}
-        <div
-          className="hidden xl:block shrink-0 w-72"
-          style={{ animation: "slide-in-right 0.8s ease-out 1.4s both" }}
-        >
-          <CareerMatchCard variant={variant} t={t} />
-        </div>
       </div>
     </section>
   )
