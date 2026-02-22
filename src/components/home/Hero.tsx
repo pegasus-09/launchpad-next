@@ -49,7 +49,6 @@ export default function Hero() {
   const glowPos = useRef({ x: 50, y: 50 })
   const rafId = useRef<number>(0)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const particleCanvasRef = useRef<HTMLCanvasElement>(null)
   const displayChars = useRef<string[]>(Array(targetWord.length).fill(" "))
   const [, setTick] = useState(0)
 
@@ -145,7 +144,7 @@ export default function Hero() {
       })
 
       // Grid lines
-      ctx.strokeStyle = isDark ? "rgba(139,92,246,0.05)" : "rgba(139,92,246,0.04)"
+      ctx.strokeStyle = isDark ? "rgba(139,92,246,0.1)" : "rgba(139,92,246,0.07)"
       ctx.lineWidth = 1
       for (let x = 0; x <= w; x += cellSize) {
         ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke()
@@ -169,125 +168,6 @@ export default function Hero() {
     }
   }, [])
 
-  // Particle network
-  useEffect(() => {
-    const canvas = particleCanvasRef.current
-    const section = sectionRef.current
-    if (!canvas || !section) return
-
-    type Particle = { x: number; y: number; vx: number; vy: number; bvx: number; bvy: number; alpha: number }
-    let particles: Particle[] = []
-    let particleRafId: number
-    const mouse = { x: -9999, y: -9999 }
-
-    const onMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect()
-      mouse.x = e.clientX - rect.left
-      mouse.y = e.clientY - rect.top
-    }
-    const onMouseLeave = () => { mouse.x = -9999; mouse.y = -9999 }
-    section.addEventListener("mousemove", onMouseMove)
-    section.addEventListener("mouseleave", onMouseLeave)
-
-    const initParticles = () => {
-      const w = section.offsetWidth || window.innerWidth
-      const h = section.offsetHeight || window.innerHeight
-      canvas.width = w
-      canvas.height = h
-      particles = Array.from({ length: 40 }, () => {
-        const bvx = (Math.random() - 0.5) * 0.12
-        const bvy = (Math.random() - 0.5) * 0.12
-        return {
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: bvx, vy: bvy, bvx, bvy,
-          alpha: 0.18 + Math.random() * 0.15,
-        }
-      })
-    }
-
-    const draw = () => {
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-      const w = canvas.width
-      const h = canvas.height
-      ctx.clearRect(0, 0, w, h)
-
-      const repelRadius = 80
-      const repelStrength = 0.8
-      const maxSpeed = 2
-
-      particles.forEach(p => {
-        // Repel from cursor
-        const mdx = p.x - mouse.x
-        const mdy = p.y - mouse.y
-        const mdist = Math.sqrt(mdx * mdx + mdy * mdy)
-        if (mdist < repelRadius && mdist > 0) {
-          const force = (1 - mdist / repelRadius) * repelStrength
-          p.vx += (mdx / mdist) * force
-          p.vy += (mdy / mdist) * force
-        }
-        // Spring back toward base drift
-        p.vx += (p.bvx - p.vx) * 0.03
-        p.vy += (p.bvy - p.vy) * 0.03
-        // Cap speed
-        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy)
-        if (speed > maxSpeed) { p.vx = (p.vx / speed) * maxSpeed; p.vy = (p.vy / speed) * maxSpeed }
-
-        p.x += p.vx
-        p.y += p.vy
-        if (p.x < 0 || p.x > w) p.vx *= -1
-        if (p.y < 0 || p.y > h) p.vy *= -1
-      })
-
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x
-          const dy = particles[i].y - particles[j].y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < 100) {
-            const lineAlpha = (1 - dist / 100) * (isDark ? 0.22 : 0.13)
-            const color = isDark ? `rgba(180,180,180,${lineAlpha})` : `rgba(120,120,120,${lineAlpha})`
-            ctx.strokeStyle = color
-            ctx.lineWidth = 1.3
-            ctx.beginPath()
-            ctx.moveTo(particles[i].x, particles[i].y)
-            ctx.lineTo(particles[j].x, particles[j].y)
-            ctx.stroke()
-          }
-        }
-      }
-
-      particles.forEach(p => {
-        const color = isDark
-          ? `rgba(180,180,180,${p.alpha})`
-          : `rgba(100,100,100,${p.alpha})`
-        ctx.shadowBlur = 4
-        ctx.shadowColor = isDark ? "rgba(200,200,200,0.25)" : "rgba(100,100,100,0.2)"
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2)
-        ctx.fillStyle = color
-        ctx.fill()
-        ctx.shadowBlur = 0
-      })
-
-      particleRafId = requestAnimationFrame(draw)
-    }
-
-    initParticles()
-    particleRafId = requestAnimationFrame(draw)
-
-    const onResize = () => initParticles()
-    window.addEventListener("resize", onResize)
-
-    return () => {
-      cancelAnimationFrame(particleRafId)
-      window.removeEventListener("resize", onResize)
-      section.removeEventListener("mousemove", onMouseMove)
-      section.removeEventListener("mouseleave", onMouseLeave)
-    }
-  }, [])
 
   // Scramble text — starts as gibberish, resolves to "Launchpad"
   useEffect(() => {
@@ -362,8 +242,6 @@ export default function Hero() {
     >
       {/* Canvas grid */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ background: "transparent" }} />
-      {/* Particle network — sits above grid, below orbs/glow */}
-      <canvas ref={particleCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ background: "transparent" }} />
 
       {/* Light mode radial gradient overlay */}
       {variant === "light" && (

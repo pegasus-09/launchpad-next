@@ -6,6 +6,7 @@ import Link from "next/link"
 export default function CTA() {
   const sectionRef = useRef<HTMLElement>(null)
   const gridCanvasRef = useRef<HTMLCanvasElement>(null)
+  const particleCanvasRef = useRef<HTMLCanvasElement>(null)
 
   // Canvas grid effect (white-tinted cells, max alpha 0.04)
   useEffect(() => {
@@ -81,6 +82,127 @@ export default function CTA() {
   }, [])
 
 
+  // Particle network
+  useEffect(() => {
+    const canvas = particleCanvasRef.current
+    const section = sectionRef.current
+    if (!canvas || !section) return
+
+    type Particle = { x: number; y: number; vx: number; vy: number; bvx: number; bvy: number; alpha: number; angle: number; angleSpeed: number; speed: number }
+    let particles: Particle[] = []
+    let particleRafId: number
+    const mouse = { x: -9999, y: -9999 }
+
+    const onMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      mouse.x = e.clientX - rect.left
+      mouse.y = e.clientY - rect.top
+    }
+    const onMouseLeave = () => { mouse.x = -9999; mouse.y = -9999 }
+    section.addEventListener("mousemove", onMouseMove)
+    section.addEventListener("mouseleave", onMouseLeave)
+
+    const initParticles = () => {
+      const w = section.offsetWidth || window.innerWidth
+      const h = section.offsetHeight || window.innerHeight
+      canvas.width = w
+      canvas.height = h
+      particles = Array.from({ length: 40 }, () => {
+        const angle = Math.random() * Math.PI * 2
+        const speed = 0.18 + Math.random() * 0.18
+        const bvx = Math.cos(angle) * speed
+        const bvy = Math.sin(angle) * speed
+        return {
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: bvx, vy: bvy, bvx, bvy,
+          alpha: 0.18 + Math.random() * 0.15,
+          angle,
+          angleSpeed: (Math.random() - 0.5) * 0.012,
+          speed,
+        }
+      })
+    }
+
+    const draw = () => {
+      const ctx = canvas.getContext("2d")
+      if (!ctx) return
+      const w = canvas.width
+      const h = canvas.height
+      ctx.clearRect(0, 0, w, h)
+
+      const repelRadius = 80
+      const repelStrength = 0.8
+      const maxSpeed = 2.5
+
+      particles.forEach(p => {
+        p.angle += p.angleSpeed
+        p.bvx = Math.cos(p.angle) * p.speed
+        p.bvy = Math.sin(p.angle) * p.speed
+
+        const mdx = p.x - mouse.x
+        const mdy = p.y - mouse.y
+        const mdist = Math.sqrt(mdx * mdx + mdy * mdy)
+        if (mdist < repelRadius && mdist > 0) {
+          const force = (1 - mdist / repelRadius) * repelStrength
+          p.vx += (mdx / mdist) * force
+          p.vy += (mdy / mdist) * force
+        }
+        p.vx += (p.bvx - p.vx) * 0.045
+        p.vy += (p.bvy - p.vy) * 0.045
+        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy)
+        if (speed > maxSpeed) { p.vx = (p.vx / speed) * maxSpeed; p.vy = (p.vy / speed) * maxSpeed }
+
+        p.x += p.vx
+        p.y += p.vy
+        if (p.x < 0 || p.x > w) p.vx *= -1
+        if (p.y < 0 || p.y > h) p.vy *= -1
+      })
+
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x
+          const dy = particles[i].y - particles[j].y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist < 100) {
+            const lineAlpha = (1 - dist / 100) * 0.25
+            ctx.strokeStyle = `rgba(255,255,255,${lineAlpha})`
+            ctx.lineWidth = 1.3
+            ctx.beginPath()
+            ctx.moveTo(particles[i].x, particles[i].y)
+            ctx.lineTo(particles[j].x, particles[j].y)
+            ctx.stroke()
+          }
+        }
+      }
+
+      particles.forEach(p => {
+        ctx.shadowBlur = 4
+        ctx.shadowColor = "rgba(255,255,255,0.3)"
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255,255,255,${p.alpha})`
+        ctx.fill()
+        ctx.shadowBlur = 0
+      })
+
+      particleRafId = requestAnimationFrame(draw)
+    }
+
+    initParticles()
+    particleRafId = requestAnimationFrame(draw)
+
+    const onResize = () => initParticles()
+    window.addEventListener("resize", onResize)
+
+    return () => {
+      cancelAnimationFrame(particleRafId)
+      window.removeEventListener("resize", onResize)
+      section.removeEventListener("mousemove", onMouseMove)
+      section.removeEventListener("mouseleave", onMouseLeave)
+    }
+  }, [])
+
   return (
     <section
       ref={sectionRef}
@@ -92,6 +214,8 @@ export default function CTA() {
 
       {/* Animated canvas grid */}
       <canvas ref={gridCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+      {/* Particle network */}
+      <canvas ref={particleCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 
       {/* CSS orbs */}
       <div className="absolute top-0 left-1/4 w-[300px] h-[300px] bg-white/10 blur-[100px] rounded-full pointer-events-none" />
