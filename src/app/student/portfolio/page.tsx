@@ -152,7 +152,7 @@ export default function PortfolioPage() {
       setEnhancingField(null)
     }
   }
-
+  
   useEffect(() => {
     async function loadData() {
       try {
